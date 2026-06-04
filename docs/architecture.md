@@ -1028,67 +1028,89 @@ Example payload:
 
 ```
 /.
+  README.md
+  pyproject.toml
+  serverless.yml
+  docker-compose.yml
+  .env.example
+
   /docs
     architecture.md
-    adr/
-      001-aws-lambda.md
+    event-storming.md
+    /adr
+      001-clean-architecture.md
       002-eventbridge.md
       003-dynamodb.md
-      004-s3.md
-      005-openai.md
-      006-serverless-framework.md
-      007-docker.md
-      008-localstack.md
-      009-clean-architecture.md
-      010-event-driven-architecture.md
-  /infrastructure
-    serverless.yml
-    docker-compose.yml
-    localstack.yml
-    env.example
-    scripts/
-      deploy.sh
-      localstack-bootstrap.sh
+      ...
+
   /src
-    /contexts
-      /identity
-        domain.py
-        application.py
-        infrastructure.py
-      /document_management
-        domain.py
-        application.py
-        infrastructure.py
-      /document_processing
-        domain.py
-        application.py
-        infrastructure.py
-      /document_intelligence
-        domain.py
-        application.py
-        infrastructure.py
-      /knowledge_base
-        domain.py
-        application.py
-        infrastructure.py
-    /common
-      ports.py
-      models.py
-      events.py
-      exceptions.py
-      config.py
-    /libs
-      storage.py
-      event_publisher.py
-      ai_client.py
-      embeddings.py
+    /shared
+      /domain
+        event.py
+        aggregate.py
+        value_object.py
+      /application
+        /ports
+          storage_port.py
+          ai_port.py
+          event_bus_port.py
+      /infrastructure
+        /eventbridge
+        /dynamodb
+        /s3
+      /config
+        settings.py
+
+    /upload
+      /domain
+        /entities
+          document.py
+        /events
+          document_uploaded.py
+      /application
+        /use_cases
+          create_upload.py
+        /dto
+      /infrastructure
+        /repositories
+        /handlers
+          create_upload_handler.py
+      /contracts
+        events.py
+
+    /extraction
+      /domain
+      /application
+      /infrastructure
+      /contracts
+
+    /analysis
+      /domain
+      /application
+      /infrastructure
+      /contracts
+
+    /qa
+      /domain
+      /application
+      /infrastructure
+      /contracts
+
   /tests
     /unit
     /integration
-    /contracts
+    /contract
+
+  /scripts
+    deploy.sh
+    localstack-bootstrap.sh
+```
+
     /fixtures
-  README.md
-  serverless.yml
+
+README.md
+serverless.yml
+
 ```
 
 ### Serverless Framework configuration
@@ -1133,3 +1155,4 @@ The architecture decision records for DocInsight are stored separately under `do
 - [ADR 008 — LocalStack](adr/008-localstack.md)
 - [ADR 009 — Clean Architecture](adr/009-clean-architecture.md)
 - [ADR 010 — Event-Driven Architecture](adr/010-event-driven-architecture.md)
+```
