@@ -3,9 +3,6 @@ repos:
     rev: v4.0.5
     hooks:
       - id: pylint
-        additional_dependencies:
-          - sqlalchemy
-          - pytest
         args:
           [
             "-rn",
