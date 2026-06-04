@@ -346,10 +346,10 @@ flowchart LR
   EventBridge -->|Triggers knowledge indexing| KB
   KB -->|Call OpenAI embedding API| OpenAI
   KB -->|Store retrieval artifacts| DynamoDB
-  CloudWatch <--|Logs/metrics| API
-  CloudWatch <--|Logs/metrics| Processing
-  CloudWatch <--|Logs/metrics| Intelligence
-  CloudWatch <--|Logs/metrics| KB
+  API -->|Logs/metrics| CloudWatch
+  Processing -->|Logs/metrics| CloudWatch
+  Intelligence -->|Logs/metrics| CloudWatch
+  KB -->|Logs/metrics| CloudWatch
 ```
 
 ### Level 2 — Container Diagram
