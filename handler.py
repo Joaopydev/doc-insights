@@ -2,6 +2,7 @@ import json
 
 
 def hello(event, context):
+    x = 200
     body = {
         "message": "Go Serverless v4.0! Your function executed successfully!",
     }
