@@ -3,12 +3,15 @@
 ## 1. System Vision
 
 ### Project vision
+
 DocInsight is an intelligent document analysis platform that enables businesses to upload, process, and query complex documents through an event-driven AWS serverless backend. It transforms PDFs into actionable insights, summarizations, entity extraction, risk signals, and retrieval-ready knowledge artifacts.
 
 ### Problem statement
+
 Enterprises struggle to derive fast, reliable understanding from large volumes of unstructured documents such as contracts, invoices, reports, resumes, and legal filings. Manual review is slow, error-prone, and does not scale to modern regulatory and analytics demands.
 
 ### Goals
+
 - Deliver asynchronous document ingestion and processing with strong scalability.
 - Provide natural-language summaries, structured entity extraction, clause detection, and risk alerts.
 - Support question-answering and retrieval-augmented generation (RAG) over processed documents.
@@ -16,12 +19,14 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
 - Use AWS serverless primitives and event-driven architecture for reliability and operational simplicity.
 
 ### Non-goals
+
 - Building a full document editing or collaboration suite.
 - Replacing human legal or medical judgment with AI decisions.
 - Implementing on-premises compute or non-AWS cloud providers.
 - Providing real-time streaming analysis at ingestion latency under 1 second.
 
 ### Functional requirements
+
 - User can upload PDF documents via API Gateway to S3.
 - System persists document metadata and processing state in DynamoDB.
 - Documents are processed asynchronously through event-driven workflows.
@@ -33,6 +38,7 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
 - System logs processing and observability events to CloudWatch.
 
 ### Non-functional requirements
+
 - Scalability: support burst uploads and processing of thousands of documents per day.
 - Resilience: recover from transient failures and process retries without data loss.
 - Observability: capture metrics and logs for Lambda, EventBridge, S3, and DynamoDB.
@@ -45,10 +51,12 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
 ## 2. Domain Discovery
 
 ### Core Domain
+
 - Document Intelligence
   - Primary value proposition: convert documents into summaries, structured entities, risk alerts, and retrieval-ready knowledge.
 
 ### Supporting Domains
+
 - Document Management
   - Handles document onboarding, storage, metadata, state, and lifecycle.
 - Identity
@@ -57,10 +65,12 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
   - Manages retrieval-ready artifacts, embeddings, and Q&A interactions.
 
 ### Generic Domains
+
 - Integration and Infrastructure
   - Event publishing, storage adapters, AI service integration, and observability.
 
 ### Entities
+
 - Document
   - Represents an uploaded PDF or ingest artifact.
   - Attributes: document_id, owner_id, source_uri, status, upload_timestamp, processing_version.
@@ -75,6 +85,7 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
   - Attributes: user_id, role, permissions.
 
 ### Value Objects
+
 - DocumentStatus
   - Represents processing state: `uploaded`, `text_extracted`, `analysis_in_progress`, `completed`, `failed`.
 - EntityType
@@ -85,6 +96,7 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
   - Represents a normalized risk rating and severity label.
 
 ### Aggregates
+
 - DocumentAggregate
   - Root: Document
   - Includes analysis state, processing events, and references to stored intelligence results.
@@ -94,6 +106,7 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
   - Manages validity of retrieval items and relationships to source documents.
 
 ### Domain Services
+
 - DocumentAnalysisService
   - Coordinates extraction, summarization, entity detection, and risk assessment.
 - DocumentStorageService
@@ -106,6 +119,7 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
   - Handles question-answering workflows and retrieval queries.
 
 > Why these elements exist
+
 - Entities model the persistent business objects around documents, intelligence outputs, and knowledge artifacts.
 - Value objects encapsulate business concepts that carry no identity but provide invariants.
 - Aggregates enforce transactional boundaries and prevent inconsistent document state transitions.
@@ -118,57 +132,69 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
 ### 1. Identity
 
 #### Responsibilities
+
 - Authenticate and authorize users or tenants.
 - Manage document ownership and access policies.
 - Provide identity context for processing events.
 
 #### Entities
+
 - UserIdentity
 - AccessPolicy
 
 #### Use Cases
+
 - Authenticate API client.
 - Authorize document upload and retrieval.
 - Resolve ownership during event processing.
 
 #### Events Published
+
 - `identity.user.authenticated`
 - `identity.access.granted`
 
 #### Events Consumed
+
 - None initially; may consume `identity.policy.updated` in future.
 
 #### Dependencies
+
 - No direct dependencies on other bounded contexts.
 - Exposes identity metadata to API Gateway and Document Management.
 
 ### 2. Document Management
 
 #### Responsibilities
+
 - Accept file upload requests and store raw document assets in S3.
 - Maintain document metadata and processing lifecycle state in DynamoDB.
 - Trigger asynchronous processing once uploads complete.
 
 #### Entities
+
 - Document
 - DocumentStatus
 - UploadMetadata
 
 #### Use Cases
+
 - Register uploaded document.
 - Update document state on upload completion.
 - Store document metadata and version information.
 
 #### Events Published
+
 - `document.created`
 - `document.upload.completed`
 - `document.processing.started`
 
 #### Events Consumed
+
 - `document.analysis.completed`
 - `document.processing.failed`
 
 #### Dependencies
+
 - Identity for owner context.
 - S3 for raw document storage.
 - EventBridge for publishing lifecycle events.
@@ -176,28 +202,34 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
 ### 3. Document Processing
 
 #### Responsibilities
+
 - Extract text and metadata from PDF documents.
 - Normalize document content and prepare it for AI analysis.
 - Manage processing orchestration and retries.
 
 #### Entities
+
 - Document
 - ProcessingJob
 - ExtractionMetadata
 
 #### Use Cases
+
 - Extract text from document.
 - Detect pages, structure, and raw text segments.
 - Signal completion of extraction.
 
 #### Events Published
+
 - `document.text.extracted`
 - `document.processing.failed`
 
 #### Events Consumed
+
 - `document.upload.completed`
 
 #### Dependencies
+
 - Document Management for document metadata.
 - S3 for raw payload and extracted text artifacts.
 - EventBridge to emit extraction completion.
@@ -205,30 +237,36 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
 ### 4. Document Intelligence
 
 #### Responsibilities
+
 - Generate summaries, extract entities, assess risk, and create structured analysis outputs.
 - Coordinate with OpenAI for natural-language understanding.
 - Publish intelligence results for storage and consumption.
 
 #### Entities
+
 - AnalysisResult
 - EntityType
 - RiskScore
 
 #### Use Cases
+
 - Generate plain-language document summaries.
 - Extract people, organizations, dates, monetary values, clauses, and risk alerts.
 - Persist analysis results in DynamoDB.
 
 #### Events Published
+
 - `document.summary.generated`
 - `document.entities.extracted`
 - `document.risk.assessed`
 - `document.analysis.completed`
 
 #### Events Consumed
+
 - `document.text.extracted`
 
 #### Dependencies
+
 - Document Processing for extracted text.
 - OpenAI for analysis and extraction.
 - EventBridge for intelligence event publication.
@@ -237,30 +275,36 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
 ### 5. Knowledge Base
 
 #### Responsibilities
+
 - Create and manage retrieval-ready artifacts from analyzed documents.
 - Generate embeddings and store vector references for Q&A and RAG.
 - Handle question answering and retrieval operations.
 
 #### Entities
+
 - KnowledgeRecord
 - EmbeddingMetadata
 - QuestionSession
 
 #### Use Cases
+
 - Split document text into retrieval chunks.
 - Generate embeddings and store knowledge records.
 - Answer questions using retrieved content.
 
 #### Events Published
+
 - `document.knowledge.indexed`
 - `question.asked`
 - `answer.generated`
 
 #### Events Consumed
+
 - `document.analysis.completed`
 - `document.summary.generated`
 
 #### Dependencies
+
 - Document Intelligence for processed text and analysis.
 - OpenAI for embedding generation and answer synthesis.
 - DynamoDB for knowledge indexing metadata.
@@ -353,6 +397,7 @@ flowchart TB
 ```
 
 ### Communication flow
+
 - User interacts with API Gateway, which invokes Lambda functions.
 - Document upload and metadata are stored in S3 and DynamoDB.
 - EventBridge routes domain events across processing lambdas.
@@ -365,6 +410,7 @@ flowchart TB
 ## 5. Event Storming
 
 ### document.created
+
 - Description: A new document record has been created and registered.
 - Producer: Document Management
 - Consumers: Document Processing, Knowledge Base
@@ -372,6 +418,7 @@ flowchart TB
 - Business Meaning: A document exists and processing may begin.
 
 ### document.upload.completed
+
 - Description: Raw document file upload to S3 is complete.
 - Producer: Document Management
 - Consumers: Document Processing
@@ -379,6 +426,7 @@ flowchart TB
 - Business Meaning: Document payload is ready for extraction.
 
 ### document.text.extracted
+
 - Description: Document text has been extracted from the PDF.
 - Producer: Document Processing
 - Consumers: Document Intelligence, Knowledge Base
@@ -386,6 +434,7 @@ flowchart TB
 - Business Meaning: Document is ready for intelligence analysis.
 
 ### document.summary.generated
+
 - Description: Plain-language summary for the document has been created.
 - Producer: Document Intelligence
 - Consumers: Knowledge Base, downstream analytics
@@ -393,6 +442,7 @@ flowchart TB
 - Business Meaning: Document understanding is available.
 
 ### document.entities.extracted
+
 - Description: Structured entities have been extracted from the document.
 - Producer: Document Intelligence
 - Consumers: Knowledge Base, reporting, search indexing
@@ -400,6 +450,7 @@ flowchart TB
 - Business Meaning: Document entities can be used for analysis and search.
 
 ### document.risk.assessed
+
 - Description: Risk analysis and alert flags have been computed.
 - Producer: Document Intelligence
 - Consumers: Monitoring, alerting, compliance workflows
@@ -407,6 +458,7 @@ flowchart TB
 - Business Meaning: Document risk exposure is surfaced.
 
 ### document.analysis.completed
+
 - Description: Document intelligence processing is complete.
 - Producer: Document Intelligence
 - Consumers: Knowledge Base, Document Management
@@ -414,6 +466,7 @@ flowchart TB
 - Business Meaning: Document is fully analyzed and ready for retrieval.
 
 ### document.knowledge.indexed
+
 - Description: Knowledge base artifacts and embeddings are ready.
 - Producer: Knowledge Base
 - Consumers: Question-answering workflows, search API
@@ -421,6 +474,7 @@ flowchart TB
 - Business Meaning: Document content is ready for RAG and retrieval.
 
 ### question.asked
+
 - Description: A user asked a question against a document or knowledge base.
 - Producer: API Lambda / Question Service
 - Consumers: Answering workflow, audit trail
@@ -428,6 +482,7 @@ flowchart TB
 - Business Meaning: User expects a response backed by document data.
 
 ### answer.generated
+
 - Description: A response for the user question has been generated.
 - Producer: Question-answering workflow
 - Consumers: API Lambda, audit, analytics
@@ -439,28 +494,37 @@ flowchart TB
 ## 6. EventBridge Contracts
 
 ### document.created
+
 - Source: `docinsight.document-management`
 - DetailType: `document.created`
 
 Schema:
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DocumentCreated",
   "type": "object",
   "properties": {
-    "document_id": {"type": "string"},
-    "owner_id": {"type": "string"},
-    "source_uri": {"type": "string", "format": "uri"},
-    "upload_timestamp": {"type": "string", "format": "date-time"},
-    "file_name": {"type": "string"},
-    "content_type": {"type": "string"}
+    "document_id": { "type": "string" },
+    "owner_id": { "type": "string" },
+    "source_uri": { "type": "string", "format": "uri" },
+    "upload_timestamp": { "type": "string", "format": "date-time" },
+    "file_name": { "type": "string" },
+    "content_type": { "type": "string" }
   },
-  "required": ["document_id", "owner_id", "source_uri", "upload_timestamp", "file_name"]
+  "required": [
+    "document_id",
+    "owner_id",
+    "source_uri",
+    "upload_timestamp",
+    "file_name"
+  ]
 }
 ```
 
 Example payload:
+
 ```json
 {
   "document_id": "doc-12345",
@@ -473,27 +537,30 @@ Example payload:
 ```
 
 ### document.upload.completed
+
 - Source: `docinsight.document-management`
 - DetailType: `document.upload.completed`
 
 Schema:
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DocumentUploadCompleted",
   "type": "object",
   "properties": {
-    "document_id": {"type": "string"},
-    "owner_id": {"type": "string"},
-    "source_uri": {"type": "string", "format": "uri"},
-    "uploaded_at": {"type": "string", "format": "date-time"},
-    "document_type": {"type": "string"}
+    "document_id": { "type": "string" },
+    "owner_id": { "type": "string" },
+    "source_uri": { "type": "string", "format": "uri" },
+    "uploaded_at": { "type": "string", "format": "date-time" },
+    "document_type": { "type": "string" }
   },
   "required": ["document_id", "owner_id", "source_uri", "uploaded_at"]
 }
 ```
 
 Example payload:
+
 ```json
 {
   "document_id": "doc-12345",
@@ -505,26 +572,34 @@ Example payload:
 ```
 
 ### document.text.extracted
+
 - Source: `docinsight.document-processing`
 - DetailType: `document.text.extracted`
 
 Schema:
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DocumentTextExtracted",
   "type": "object",
   "properties": {
-    "document_id": {"type": "string"},
-    "extracted_text_uri": {"type": "string", "format": "uri"},
-    "page_count": {"type": "integer", "minimum": 1},
-    "extraction_completed_at": {"type": "string", "format": "date-time"}
+    "document_id": { "type": "string" },
+    "extracted_text_uri": { "type": "string", "format": "uri" },
+    "page_count": { "type": "integer", "minimum": 1 },
+    "extraction_completed_at": { "type": "string", "format": "date-time" }
   },
-  "required": ["document_id", "extracted_text_uri", "page_count", "extraction_completed_at"]
+  "required": [
+    "document_id",
+    "extracted_text_uri",
+    "page_count",
+    "extraction_completed_at"
+  ]
 }
 ```
 
 Example payload:
+
 ```json
 {
   "document_id": "doc-12345",
@@ -535,26 +610,29 @@ Example payload:
 ```
 
 ### document.summary.generated
+
 - Source: `docinsight.document-intelligence`
 - DetailType: `document.summary.generated`
 
 Schema:
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DocumentSummaryGenerated",
   "type": "object",
   "properties": {
-    "document_id": {"type": "string"},
-    "summary_uri": {"type": "string", "format": "uri"},
-    "summary_text": {"type": "string"},
-    "generated_at": {"type": "string", "format": "date-time"}
+    "document_id": { "type": "string" },
+    "summary_uri": { "type": "string", "format": "uri" },
+    "summary_text": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" }
   },
   "required": ["document_id", "summary_uri", "generated_at"]
 }
 ```
 
 Example payload:
+
 ```json
 {
   "document_id": "doc-12345",
@@ -565,108 +643,130 @@ Example payload:
 ```
 
 ### document.entities.extracted
+
 - Source: `docinsight.document-intelligence`
 - DetailType: `document.entities.extracted`
 
 Schema:
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DocumentEntitiesExtracted",
   "type": "object",
   "properties": {
-    "document_id": {"type": "string"},
-    "entities_uri": {"type": "string", "format": "uri"},
+    "document_id": { "type": "string" },
+    "entities_uri": { "type": "string", "format": "uri" },
     "entities": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "type": {"type": "string"},
-          "text": {"type": "string"},
-          "page": {"type": "integer"},
-          "confidence": {"type": "number"}
+          "type": { "type": "string" },
+          "text": { "type": "string" },
+          "page": { "type": "integer" },
+          "confidence": { "type": "number" }
         },
         "required": ["type", "text", "page"]
       }
     },
-    "generated_at": {"type": "string", "format": "date-time"}
+    "generated_at": { "type": "string", "format": "date-time" }
   },
   "required": ["document_id", "entities_uri", "entities", "generated_at"]
 }
 ```
 
 Example payload:
+
 ```json
 {
   "document_id": "doc-12345",
   "entities_uri": "s3://docinsight-processed/doc-12345/entities.json",
   "entities": [
-    {"type": "person", "text": "John Doe", "page": 2, "confidence": 0.96},
-    {"type": "organization", "text": "Acme Corp", "page": 1, "confidence": 0.94},
-    {"type": "monetary_value", "text": "$120,000", "page": 4, "confidence": 0.90}
+    { "type": "person", "text": "John Doe", "page": 2, "confidence": 0.96 },
+    {
+      "type": "organization",
+      "text": "Acme Corp",
+      "page": 1,
+      "confidence": 0.94
+    },
+    {
+      "type": "monetary_value",
+      "text": "$120,000",
+      "page": 4,
+      "confidence": 0.9
+    }
   ],
   "generated_at": "2026-06-04T12:12:00Z"
 }
 ```
 
 ### document.risk.assessed
+
 - Source: `docinsight.document-intelligence`
 - DetailType: `document.risk.assessed`
 
 Schema:
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DocumentRiskAssessed",
   "type": "object",
   "properties": {
-    "document_id": {"type": "string"},
-    "risk_level": {"type": "string", "enum": ["low", "medium", "high"]},
+    "document_id": { "type": "string" },
+    "risk_level": { "type": "string", "enum": ["low", "medium", "high"] },
     "risk_reasons": {
       "type": "array",
-      "items": {"type": "string"}
+      "items": { "type": "string" }
     },
-    "details_uri": {"type": "string", "format": "uri"},
-    "assessed_at": {"type": "string", "format": "date-time"}
+    "details_uri": { "type": "string", "format": "uri" },
+    "assessed_at": { "type": "string", "format": "date-time" }
   },
   "required": ["document_id", "risk_level", "details_uri", "assessed_at"]
 }
 ```
 
 Example payload:
+
 ```json
 {
   "document_id": "doc-12345",
   "risk_level": "medium",
-  "risk_reasons": ["Ambiguous indemnity clause", "Late payment penalty not defined"],
+  "risk_reasons": [
+    "Ambiguous indemnity clause",
+    "Late payment penalty not defined"
+  ],
   "details_uri": "s3://docinsight-processed/doc-12345/risk.json",
   "assessed_at": "2026-06-04T12:14:00Z"
 }
 ```
 
 ### document.analysis.completed
+
 - Source: `docinsight.document-intelligence`
 - DetailType: `document.analysis.completed`
 
 Schema:
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DocumentAnalysisCompleted",
   "type": "object",
   "properties": {
-    "document_id": {"type": "string"},
-    "summary_uri": {"type": "string", "format": "uri"},
-    "entities_uri": {"type": "string", "format": "uri"},
-    "risk_uri": {"type": "string", "format": "uri"},
-    "completed_at": {"type": "string", "format": "date-time"}
+    "document_id": { "type": "string" },
+    "summary_uri": { "type": "string", "format": "uri" },
+    "entities_uri": { "type": "string", "format": "uri" },
+    "risk_uri": { "type": "string", "format": "uri" },
+    "completed_at": { "type": "string", "format": "date-time" }
   },
   "required": ["document_id", "completed_at"]
 }
 ```
 
 Example payload:
+
 ```json
 {
   "document_id": "doc-12345",
@@ -678,25 +778,28 @@ Example payload:
 ```
 
 ### document.knowledge.indexed
+
 - Source: `docinsight.knowledge-base`
 - DetailType: `document.knowledge.indexed`
 
 Schema:
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "DocumentKnowledgeIndexed",
   "type": "object",
   "properties": {
-    "document_id": {"type": "string"},
-    "knowledge_count": {"type": "integer", "minimum": 0},
-    "indexed_at": {"type": "string", "format": "date-time"}
+    "document_id": { "type": "string" },
+    "knowledge_count": { "type": "integer", "minimum": 0 },
+    "indexed_at": { "type": "string", "format": "date-time" }
   },
   "required": ["document_id", "knowledge_count", "indexed_at"]
 }
 ```
 
 Example payload:
+
 ```json
 {
   "document_id": "doc-12345",
@@ -706,27 +809,36 @@ Example payload:
 ```
 
 ### question.asked
+
 - Source: `docinsight.knowledge-base`
 - DetailType: `question.asked`
 
 Schema:
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "QuestionAsked",
   "type": "object",
   "properties": {
-    "question_id": {"type": "string"},
-    "document_id": {"type": "string"},
-    "user_id": {"type": "string"},
-    "query_text": {"type": "string"},
-    "asked_at": {"type": "string", "format": "date-time"}
+    "question_id": { "type": "string" },
+    "document_id": { "type": "string" },
+    "user_id": { "type": "string" },
+    "query_text": { "type": "string" },
+    "asked_at": { "type": "string", "format": "date-time" }
   },
-  "required": ["question_id", "document_id", "user_id", "query_text", "asked_at"]
+  "required": [
+    "question_id",
+    "document_id",
+    "user_id",
+    "query_text",
+    "asked_at"
+  ]
 }
 ```
 
 Example payload:
+
 ```json
 {
   "question_id": "q-001",
@@ -738,31 +850,40 @@ Example payload:
 ```
 
 ### answer.generated
+
 - Source: `docinsight.knowledge-base`
 - DetailType: `answer.generated`
 
 Schema:
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "AnswerGenerated",
   "type": "object",
   "properties": {
-    "question_id": {"type": "string"},
-    "document_id": {"type": "string"},
-    "user_id": {"type": "string"},
-    "answer_text": {"type": "string"},
+    "question_id": { "type": "string" },
+    "document_id": { "type": "string" },
+    "user_id": { "type": "string" },
+    "answer_text": { "type": "string" },
     "source_references": {
       "type": "array",
-      "items": {"type": "string"}
+      "items": { "type": "string" }
     },
-    "generated_at": {"type": "string", "format": "date-time"}
+    "generated_at": { "type": "string", "format": "date-time" }
   },
-  "required": ["question_id", "document_id", "user_id", "answer_text", "generated_at"]
+  "required": [
+    "question_id",
+    "document_id",
+    "user_id",
+    "answer_text",
+    "generated_at"
+  ]
 }
 ```
 
 Example payload:
+
 ```json
 {
   "question_id": "q-001",
@@ -779,36 +900,42 @@ Example payload:
 ## 7. Clean Architecture Design
 
 ### Identity Context
+
 - Domain Layer: `UserIdentity`, `AccessPolicy`, authentication invariants.
 - Application Layer: authentication and authorization use cases, policy evaluation services.
 - Infrastructure Layer: token validation, API Gateway authorizer integration, identity provider clients.
 - Presentation Layer: API Gateway authorizer and security middleware.
 
 ### Document Management Context
+
 - Domain Layer: `Document`, `DocumentStatus`, lifecycle rules, aggregate invariants.
 - Application Layer: upload registration, metadata persistence, state transition orchestrators.
 - Infrastructure Layer: S3 persistence adapter, DynamoDB repository adapter, EventBridge publisher adapter.
 - Presentation Layer: REST API endpoints for upload initiation and status queries.
 
 ### Document Processing Context
+
 - Domain Layer: `ProcessingJob`, `ExtractionMetadata`, text extraction invariants.
 - Application Layer: extraction workflow, retry handling, text artifact creation.
 - Infrastructure Layer: PDF/OCR adapters, S3 storage adapters, EventBridge integration.
 - Presentation Layer: event-triggered Lambda handlers and monitoring dashboards.
 
 ### Document Intelligence Context
+
 - Domain Layer: `AnalysisResult`, `EntityType`, `RiskScore`, analysis business rules.
 - Application Layer: intelligence workflow, summary generation, entity extraction orchestration.
 - Infrastructure Layer: OpenAI client adapter, DynamoDB result repository, EventBridge publisher.
 - Presentation Layer: event-driven function and analytics endpoints.
 
 ### Knowledge Base Context
+
 - Domain Layer: `KnowledgeRecord`, `EmbeddingMetadata`, retrieval invariants.
 - Application Layer: chunking, embedding generation, question-answer orchestration.
 - Infrastructure Layer: OpenAI embedding adapter, DynamoDB vector/index metadata store, S3 chunk storage.
 - Presentation Layer: query API endpoints and event-handling Lambda functions.
 
 ### Dependency direction
+
 - Higher layers depend only on abstractions defined in lower or same layers.
 - Domain layer has no dependencies on application or infrastructure.
 - Application layer depends on domain abstractions and ports.
@@ -820,6 +947,7 @@ Example payload:
 ## 8. Ports and Adapters
 
 ### DocumentRepository
+
 - Purpose: persist and retrieve document aggregates and metadata.
 - Methods:
   - `get_document(document_id)`
@@ -829,6 +957,7 @@ Example payload:
 - Outputs: document entity, operation result.
 
 ### StorageService
+
 - Purpose: abstract raw and processed object storage in S3.
 - Methods:
   - `upload_object(bucket, key, body, metadata)`
@@ -838,6 +967,7 @@ Example payload:
 - Outputs: storage URI, object stream, signed URL.
 
 ### AIService
+
 - Purpose: execute OpenAI calls for summarization, entity extraction, risk analysis, and answers.
 - Methods:
   - `generate_summary(prompt, context)`
@@ -848,6 +978,7 @@ Example payload:
 - Outputs: AI response payload, structured results.
 
 ### EventPublisher
+
 - Purpose: publish domain events to EventBridge.
 - Methods:
   - `publish_event(source, detail_type, detail)`
@@ -855,6 +986,7 @@ Example payload:
 - Outputs: publish acknowledgement.
 
 ### EmbeddingService
+
 - Purpose: generate vector embeddings for text chunks.
 - Methods:
   - `create_embedding(text, model)`
@@ -862,6 +994,7 @@ Example payload:
 - Outputs: embedding vector array.
 
 ### VectorStore
+
 - Purpose: store and look up retrieval-ready knowledge metadata.
 - Methods:
   - `save_record(knowledge_record)`
@@ -870,6 +1003,7 @@ Example payload:
 - Outputs: saved record confirmation, ranked knowledge records.
 
 ### DocumentProcessingService
+
 - Purpose: coordinate PDF extraction and text normalization.
 - Methods:
   - `extract_text(document_id, source_uri)`
@@ -877,6 +1011,7 @@ Example payload:
 - Outputs: extracted text artifacts and metadata.
 
 ### QuestionAnsweringService
+
 - Purpose: orchestrate retrieval and answer generation for user queries.
 - Methods:
   - `ask_question(document_id, user_id, query)`
@@ -957,6 +1092,7 @@ Example payload:
 ```
 
 ### Serverless Framework configuration
+
 - Central service root in `serverless.yml`.
 - Per-function Lambda definitions under `functions:`.
 - Resource declarations for DynamoDB tables, S3 buckets, EventBridge event bus, and IAM roles.
@@ -964,16 +1100,19 @@ Example payload:
 - Use separate stages for `dev`, `staging`, `prod`.
 
 ### Docker setup
+
 - `docker-compose.yml` for LocalStack and supporting infrastructure.
 - Use Docker for local AWS service emulation and consistent dependency management.
 - Keep container images aligned with LocalStack supported versions.
 
 ### LocalStack setup
+
 - `localstack.yml` or `docker-compose.yml` service definitions.
 - Bootstrap script to create S3 buckets, DynamoDB tables, EventBridge bus, and IAM-like resources.
 - Local environment overrides to point service clients to LocalStack endpoints.
 
 ### Environment configuration strategy
+
 - `env.example` defines required variables: `AWS_REGION`, `OPENAI_API_KEY`, `STAGE`, `EVENT_BUS_NAME`, `S3_BUCKET_UPLOADS`, `S3_BUCKET_PROCESSED`, `DDB_DOCUMENT_TABLE`, `DDB_KNOWLEDGE_TABLE`.
 - Use `serverless-dotenv-plugin` or built-in `serverless` support for environment injection.
 - Keep secrets outside source control and use parameter store / secrets manager in production.
@@ -982,103 +1121,15 @@ Example payload:
 
 ## 10. ADRs
 
-### ADR 001 — AWS Lambda
-- Context: Document processing must scale on demand and minimize infrastructure management overhead.
-- Decision: Use AWS Lambda for all serverless compute: upload orchestration, extraction, intelligence, and knowledge indexing.
-- Alternatives considered:
-  - ECS/Fargate: more infrastructure overhead and cost for infrequent workloads.
-  - EC2: not aligned with serverless scalability goals.
-- Consequences:
-  - Simplified deployment and scaling.
-  - Need to manage cold starts and function timeout boundaries.
-  - Must keep Lambda package size small and use ARM64 runtime.
+The architecture decision records for DocInsight are stored separately under `docs/adr/`.
 
-### ADR 002 — EventBridge
-- Context: The system needs reliable, decoupled orchestration between document lifecycle stages.
-- Decision: Use EventBridge as the event router between bounded-context Lambdas.
-- Alternatives considered:
-  - SQS: good for queueing but less flexible for event routing and filtering.
-  - SNS: supports pub/sub but does not provide the same event-driven contract semantics.
-- Consequences:
-  - Clear event contracts and decoupled services.
-  - Additional operational cost and configuration overhead.
-
-### ADR 003 — DynamoDB
-- Context: Document metadata, analysis results, and knowledge indexing require highly available storage.
-- Decision: Use DynamoDB for primary persistence of document state and knowledge metadata.
-- Alternatives considered:
-  - RDS/PostgreSQL: more operational burden and weaker serverless scaling.
-  - OpenSearch: better for search but not ideal for metadata and transactional state.
-- Consequences:
-  - Fast, scalable access patterns.
-  - Must design partition keys with access patterns in mind.
-
-### ADR 004 — S3
-- Context: Raw documents and processed artifacts must be durable, low-cost, and scalable.
-- Decision: Use S3 for raw document uploads, extracted text artifacts, summaries, and risk payloads.
-- Alternatives considered:
-  - EFS: overkill for object storage and more expensive.
-  - DynamoDB binary fields: not cost effective for large documents.
-- Consequences:
-  - Durable object storage and easy integration with Lambda.
-  - Need explicit lifecycle policies and access controls.
-
-### ADR 005 — OpenAI
-- Context: Document intelligence requires advanced NLP and embedding capabilities.
-- Decision: Use OpenAI for summarization, entity extraction, risk assessment, and embeddings.
-- Alternatives considered:
-  - Open-source models on SageMaker: higher management burden and slower iteration.
-  - AWS Bedrock / Comprehend: not yet optimized for this document intelligence use case.
-- Consequences:
-  - Rapid development and high-quality output.
-  - External dependency, cost per call, and need for prompt engineering.
-
-### ADR 006 — Serverless Framework
-- Context: Infrastructure must be defined as code and deployed consistently.
-- Decision: Use Serverless Framework for AWS resource configuration and function deployment.
-- Alternatives considered:
-  - AWS CDK: more code-centric but heavier for this project.
-  - Terraform: strong IaC, but Serverless Framework is better tuned for Lambda-first applications.
-- Consequences:
-  - Simplified Lambda/service deployment.
-  - Need to manage plugin compatibility and local emulation support.
-
-### ADR 007 — Docker
-- Context: Local development needs reproducible AWS service emulation.
-- Decision: Use Docker to run LocalStack and any auxiliary development services.
-- Alternatives considered:
-  - Native AWS CLI only: less reproducible and harder to sandbox.
-  - Remote development environment: not ideal for offline or isolated development.
-- Consequences:
-  - Consistent local staging environment.
-  - Developers need Docker installed and resources allocated.
-
-### ADR 008 — LocalStack
-- Context: The team needs to validate AWS serverless behavior locally before deployment.
-- Decision: Use LocalStack to emulate AWS services during development and integration testing.
-- Alternatives considered:
-  - Unit tests only: insufficient for event-driven integration validation.
-  - AWS dev account: slower and riskier for early development.
-- Consequences:
-  - Faster local feedback loops.
-  - Some AWS feature gaps and potential behavioral drift.
-
-### ADR 009 — Clean Architecture
-- Context: The system must remain maintainable as capabilities expand.
-- Decision: Adopt Clean Architecture with separate domain, application, infrastructure, and presentation layers.
-- Alternatives considered:
-  - Monolithic script-based Lambda functions: faster to prototype but harder to evolve.
-  - Hexagonal architecture: similar benefits but not necessary to distinguish from Clean Architecture.
-- Consequences:
-  - Better separation of concerns and testability.
-  - Requires discipline to keep layers decoupled.
-
-### ADR 010 — Event-Driven Architecture
-- Context: Document workflows must be decoupled and scalable across multiple processing stages.
-- Decision: Use event-driven design with EventBridge and domain events to orchestrate processing.
-- Alternatives considered:
-  - Synchronous orchestration in a single Lambda: simpler but brittle and harder to scale.
-  - Step Functions: good for orchestrations but adds complexity and cost for this event-first design.
-- Consequences:
-  - Clear separation of responsibilities.
-  - Event contract management becomes an essential operational discipline.
+- [ADR 001 — AWS Lambda](adr/001-aws-lambda.md)
+- [ADR 002 — EventBridge](adr/002-eventbridge.md)
+- [ADR 003 — DynamoDB](adr/003-dynamodb.md)
+- [ADR 004 — S3](adr/004-s3.md)
+- [ADR 005 — OpenAI](adr/005-openai.md)
+- [ADR 006 — Serverless Framework](adr/006-serverless-framework.md)
+- [ADR 007 — Docker](adr/007-docker.md)
+- [ADR 008 — LocalStack](adr/008-localstack.md)
+- [ADR 009 — Clean Architecture](adr/009-clean-architecture.md)
+- [ADR 010 — Event-Driven Architecture](adr/010-event-driven-architecture.md)
