@@ -1,7 +1,7 @@
 import json
 
 
-def helloWorld(event, context):
+def helloWorldHello(event, context):
     x = 400
     body = {
         "message": "Go Serverless v4.0! Your function executed successfully!",
