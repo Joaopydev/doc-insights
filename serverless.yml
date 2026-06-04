@@ -1,0 +1,16 @@
+org: jonvibes
+service: document-analyzer-api
+
+provider:
+  name: aws
+  region: us-east-1
+  runtime: python3.11
+  architecture: arm64
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
