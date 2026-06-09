@@ -1,10 +1,14 @@
 [MAIN]
+init-hook='import sys; sys.path.append(".")'
 
 disable=
       C0116, # missing-function-docstring
       E0015, # unrecognized-option
       C0114, # missing-module-docstring
       unused-argument,
+      missing-class-docstring,
+      too-few-public-methods,
+      mixed-line-endings,
 
 # Analyse import fallback blocks. This can be used to support both Python 2 and
 # 3 compatible code, which means that the block might have code that exists

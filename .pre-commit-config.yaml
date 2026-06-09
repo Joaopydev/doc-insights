@@ -3,6 +3,8 @@ repos:
     rev: v4.0.5
     hooks:
       - id: pylint
+        additional_dependencies:
+          - boto3
         args:
           [
             "-rn",
