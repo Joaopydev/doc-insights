@@ -23,12 +23,12 @@ class Document:
     def create(
         cls,
         user_id: str,
-        metadata: FileMetadata
+        metadata: dict
     ) -> "Document":
 
         now = datetime.now(UTC)
         document_id = str(uuid4())
-        file_metadata = FileMetadata(**metadata.to_dict())
+        file_metadata = FileMetadata(**metadata)
 
         s3_key = S3Key(
             f"users/{user_id}/documents/{document_id}/{file_metadata.filename}"
