@@ -6,11 +6,28 @@ provider:
   region: us-east-1
   runtime: python3.11
   architecture: arm64
+  enviroment:
+    BUCKET_NAME: !Ref UploadsBucket
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
 
 functions:
-  hello:
-    handler: handler.hello
+  createDocument:
+    handler: src.functions.create_document.handler
     events:
       - httpApi:
-          path: /
-          method: get
+          path: /create
+          method: POST
+
+resources:
+  Resources:
+    UploadsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: document-analyzer-uploads
