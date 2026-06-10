@@ -5,6 +5,7 @@ repos:
       - id: pylint
         additional_dependencies:
           - boto3
+          - pydantic_settings
         args:
           [
             "-rn",

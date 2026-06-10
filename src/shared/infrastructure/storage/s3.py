@@ -1,12 +1,13 @@
 import boto3
 
 from src.shared.application.ports.storage_port import StoragePort
+from src.shared.settings.enviroment import settings
 
 
 class S3Client(StoragePort):
 
-    def __init__(self, bucket_name: str):
-        self.bucket_name = bucket_name
+    def __init__(self):
+        self.bucket_name = settings.bucket_name
         self.s3_client = boto3.client("s3")
 
     def get_presigned_url(
