@@ -6,8 +6,9 @@ provider:
   region: us-east-1
   runtime: python3.11
   architecture: arm64
-  enviroment:
+  environment:
     BUCKET_NAME: !Ref UploadsBucket
+    DOCUMENT_TABLE: !Ref DocumentTable
 
   iam:
     role:
@@ -16,13 +17,24 @@ provider:
           Action:
             - s3:PutObject
             - s3:GetObject
+          Resource: !Sub "${UploadsBucket.Arn}/*"
+
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: !GetAtt DocumentTable.Arn
 
 functions:
   createDocument:
-    handler: src.functions.create_document.handler
+    handler: src.functions.create_document.handler.handler
     events:
       - httpApi:
-          path: /create
+          path: /document
           method: POST
 
 resources:
@@ -30,4 +42,16 @@ resources:
     UploadsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: document-analyzer-uploads
+        BucketName: docinsight-raw-documents
+
+    DocumentTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: document-table
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH

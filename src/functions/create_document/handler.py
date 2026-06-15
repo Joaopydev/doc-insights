@@ -6,13 +6,8 @@ from src.main.composers.create_document_composer import CreateDocumentComposer
 
 def handler(event: Dict[str, Any], context: Any):
 
-    response = APIGatewayRequestAdapter.adapt(
+    http_response = APIGatewayRequestAdapter.adapt(
         event=event,
         use_case=CreateDocumentComposer.compose()
     )
-
-    return {
-        "statusCode": response.status_code,
-        "headers": response.headers,
-        "body": response.body
-    }
+    return http_response.to_dict()

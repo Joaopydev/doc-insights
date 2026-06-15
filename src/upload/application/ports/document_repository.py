@@ -5,5 +5,5 @@ from src.upload.domain.entities.document import Document
 class DocumentRepository(ABC):
 
     @abstractmethod
-    def save(self, document: Document) -> None:
+    def insert_document(self, document: Document) -> None:
         pass

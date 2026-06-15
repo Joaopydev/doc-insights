@@ -8,5 +8,5 @@ class DBClient(ABC):
         pass
 
     @abstractmethod
-    def get_table(self, table_name: str):
+    def __get_table(self, table_name: str):
         pass

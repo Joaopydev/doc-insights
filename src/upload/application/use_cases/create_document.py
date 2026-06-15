@@ -27,9 +27,9 @@ class CreateDocumentUseCase:
             user_id=request.body["user_id"],
             metadata=request.body["metadata"]
         )
-        self.document_repository.save(document)
+        self.document_repository.insert_document(document)
 
-        presigned_url = self.storage_port.get_presigned_url(
+        presigned_url = self.storage_port.generate_presigned_url(
             document_key=document.id,
             content_type=request.metadata.content_type,
             expire_in=3600
