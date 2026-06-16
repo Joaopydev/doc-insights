@@ -6,6 +6,7 @@ repos:
         additional_dependencies:
           - boto3
           - pydantic_settings
+          - PyJWT
         args:
           [
             "-rn",

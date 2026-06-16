@@ -17,6 +17,7 @@ pre_commit==4.6.0
 pydantic==2.13.4
 pydantic-settings==2.14.1
 pydantic_core==2.46.4
+PyJWT==2.13.0
 pylint==4.0.5
 python-dateutil==2.9.0.post0
 python-discovery==1.4.0
