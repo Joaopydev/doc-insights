@@ -4,17 +4,15 @@ from src.shared.presentation.http_types.http_response import HTTPResponse
 
 class ExceptionResponseBuilder:
 
-    def __init__(self, error: Exception) -> None:
-        self._error = error
-
-    def handle(self) -> HTTPResponse:
-        if isinstance(self._error, AppException):
+    @staticmethod
+    def build(error: Exception) -> HTTPResponse:
+        if isinstance(error, AppException):
             return HTTPResponse(
-                status_code=self._error.status_code,
+                status_code=error.status_code,
                 body={
                     "errors": {
-                        "title": self._error.name,
-                        "detail": self._error.message,
+                        "title": error.name,
+                        "detail": error.message,
                     }
                 }
             )
@@ -24,7 +22,7 @@ class ExceptionResponseBuilder:
             body={
                 "errors": {
                     "title": "Internal Server Error",
-                    "detail": self._error.message,
+                    "detail": error.message,
                 }
             }
         )
