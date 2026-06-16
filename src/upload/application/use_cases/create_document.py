@@ -31,7 +31,7 @@ class CreateDocumentUseCase:
 
         presigned_url = self.storage_port.generate_presigned_url(
             document_key=document.id,
-            content_type=request.metadata.content_type,
+            content_type=document.metadata.content_type,
             expire_in=3600
         )
 

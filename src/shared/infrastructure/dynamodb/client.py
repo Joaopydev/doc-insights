@@ -9,8 +9,8 @@ class DynamoDBClient(DBClient):
         self.__dynamodb_resource = boto3.resource("dynamodb")
 
     def save(self, table_name: str, item: dict):
-        table = self.__get_table(table_name)
+        table = self._get_table(table_name)
         table.put_item(Item=item)
 
-    def __get_table(self, table_name: str):
+    def _get_table(self, table_name: str):
         return self.__dynamodb_resource.Table(table_name)

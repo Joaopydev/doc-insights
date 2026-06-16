@@ -1,6 +1,10 @@
 org: jonvibes
 service: document-analyzer-api
 
+custom:
+  pythonRequirements:
+    dockerizePip: true
+
 provider:
   name: aws
   region: us-east-1
