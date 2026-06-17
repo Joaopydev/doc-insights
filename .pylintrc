@@ -11,6 +11,8 @@ disable=
       mixed-line-endings,
       unused-private-member,
       broad-exception-caught,
+      too-many-arguments,
+      too-many-positional-arguments,
 
 # Analyse import fallback blocks. This can be used to support both Python 2 and
 # 3 compatible code, which means that the block might have code that exists

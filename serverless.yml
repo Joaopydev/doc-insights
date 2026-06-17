@@ -13,6 +13,9 @@ provider:
   environment:
     BUCKET_NAME: !Ref UploadsBucket
     DOCUMENT_TABLE: !Ref DocumentTable
+    USER_TABLE: !Ref UserTable
+    JWT_PRIVATE_KEY: ${env:JWT_PRIVATE_KEY}
+    JWT_PUBLIC_KEY: ${env:JWT_PUBLIC_KEY}
 
   iam:
     role:
@@ -41,6 +44,20 @@ functions:
           path: /document
           method: POST
 
+  signin:
+    handler: src.functions.signin.handler.handler
+    events:
+      - httpApi:
+          path: /signin
+          method: POST
+
+  signup:
+    handler: src.functions.signup.handler.handler
+    events:
+      - httpApi:
+          path: /signup
+          method: POST
+
 resources:
   Resources:
     UploadsBucket:
@@ -52,6 +69,18 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: document-table
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: user-table
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
