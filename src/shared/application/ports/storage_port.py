@@ -6,7 +6,7 @@ class StoragePort(ABC):
     @abstractmethod
     def generate_presigned_url(
         self,
-        document_key: str,
+        file_key: str,
         content_type: str,
         expire_in: int
     ) -> str:

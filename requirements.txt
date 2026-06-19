@@ -25,6 +25,7 @@ PyJWT==2.13.0
 pylint==4.0.5
 python-dateutil==2.9.0.post0
 python-discovery==1.4.0
+python-dotenv==1.2.2
 PyYAML==6.0.3
 s3transfer==0.18.0
 six==1.17.0

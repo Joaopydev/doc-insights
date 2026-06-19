@@ -24,13 +24,13 @@ class CreateDocumentUseCase:
     ) -> HTTPResponse:
 
         document = Document.create(
-            user_id=request.body["user_id"],
+            user_id=request.user_id,
             metadata=request.body["metadata"]
         )
         self.document_repository.insert_document(document)
 
         presigned_url = self.storage_port.generate_presigned_url(
-            document_key=document.id,
+            file_key=document.s3_key.get_value(),
             content_type=document.metadata.content_type,
             expire_in=3600
         )

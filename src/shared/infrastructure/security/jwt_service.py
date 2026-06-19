@@ -28,7 +28,7 @@ class JWTService(JWTPort):
             payload_data = jwt.decode(
                 jwt=token,
                 key=settings.jwt_public_key,
-                algorithms="RS256",
+                algorithms=["RS256"],
                 issuer="SecurityService"
             )
 

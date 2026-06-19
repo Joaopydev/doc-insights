@@ -11,7 +11,7 @@ class S3Client(StoragePort):
 
     def generate_presigned_url(
         self,
-        document_key: str,
+        file_key: str,
         content_type: str,
         expire_in: int
     ) -> str:
@@ -20,7 +20,7 @@ class S3Client(StoragePort):
             ExpiresIn=expire_in,
             Params={
                 "Bucket": settings.bucket_name,
-                "Key": document_key,
+                "Key": file_key,
                 "ContentType": content_type
             }
         )

@@ -9,6 +9,7 @@ repos:
           - PyJWT
           - bcrypt
           - cryptography
+          - python-dotenv
         args:
           [
             "-rn",
