@@ -17,7 +17,8 @@ class UserIdentity:
             "id": self.id,
             "name": self.name,
             "email": self.email,
-            "password_hash": self.password
+            "password": self.password,
+            "created_at": self.created_at.isoformat(),
         }
 
     @classmethod

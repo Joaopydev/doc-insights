@@ -8,6 +8,7 @@ repos:
           - pydantic_settings
           - PyJWT
           - bcrypt
+          - cryptography
         args:
           [
             "-rn",

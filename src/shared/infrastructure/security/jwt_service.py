@@ -10,7 +10,7 @@ class JWTService(JWTPort):
     def signin_access_token(self, user_id: str):
         now = datetime.now(timezone.utc)
         payload = {
-            "user_id": int(user_id),
+            "user_id": user_id,
             "iss": "SecurityService",
             "iat": int(now.timestamp()),
             "exp": now + timedelta(days=3)

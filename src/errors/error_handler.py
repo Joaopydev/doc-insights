@@ -22,7 +22,7 @@ class ExceptionResponseBuilder:
             body={
                 "errors": {
                     "title": "Internal Server Error",
-                    "detail": error.message,
+                    "detail": str(error),
                 }
             }
         )

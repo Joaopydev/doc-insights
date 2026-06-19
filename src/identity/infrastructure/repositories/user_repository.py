@@ -29,7 +29,7 @@ class UserRepository(UserRepositoryInterface):
 
         return UserIdentity(**item)
 
-    def get_by_email(self, email: str):
+    def get_by_email(self, email: str) -> UserIdentity:
         item = self.db_client.query(
             table_name=settings.user_table,
             index_name="email-index",
