@@ -1,7 +1,7 @@
 from src.upload.application.ports.document_repository import (
     DocumentRepository as DocumentRepositoryInterface
 )
-from src.upload.domain.entities.document import Document
+from src.shared.domain.entities.document import Document
 from src.shared.application.ports.db_client import DBClient
 
 from src.main.config.settings import settings

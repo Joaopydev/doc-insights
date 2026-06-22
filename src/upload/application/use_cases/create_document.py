@@ -1,8 +1,8 @@
 from src.upload.application.ports.document_repository import (
     DocumentRepository as DocumentRepositoryInterface
 )
-from src.upload.domain.entities.document import Document
 
+from src.shared.domain.entities.document import Document
 from src.shared.application.ports.storage_port import StoragePort
 from src.shared.presentation.http_types.http_request import HTTPRequest
 from src.shared.presentation.http_types.http_response import HTTPResponse

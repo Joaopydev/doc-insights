@@ -2,9 +2,9 @@ from datetime import datetime, UTC
 from dataclasses import dataclass
 from uuid import uuid4
 
-from src.upload.domain.value_objects.document_status import DocumentStatus
-from src.upload.domain.value_objects.file_metadata import FileMetadata
-from src.upload.domain.value_objects.s3_key import S3Key
+from src.shared.domain.value_objects.document_status import DocumentStatus
+from src.shared.domain.value_objects.file_metadata import FileMetadata
+from src.shared.domain.value_objects.s3_key import S3Key
 
 
 @dataclass
@@ -42,6 +42,30 @@ class Document:
             status=DocumentStatus.UPLOADING,
             created_at=now,
             updated_at=now
+        )
+
+    @classmethod
+    def restore(
+        cls,
+        document_id: str,
+        user_id: str,
+        s3_key: str,
+        metadata: dict,
+        status: DocumentStatus,
+        created_at: str,
+        updated_at: str,
+    ):
+        file_metadata = FileMetadata(**metadata)
+        s3_key = S3Key(s3_key)
+
+        return cls(
+            id=document_id,
+            user_id=user_id,
+            metadata=file_metadata,
+            s3_key=s3_key,
+            status=status,
+            created_at=datetime.fromisoformat(created_at),
+            updated_at=datetime.fromisoformat(updated_at)
         )
 
     def to_dict(self):

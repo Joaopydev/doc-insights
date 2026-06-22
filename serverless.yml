@@ -36,6 +36,7 @@ provider:
             - dynamodb:DeleteItem
           Resource:
             - !GetAtt DocumentTable.Arn
+            - !Sub "${DocumentTable.Arn}/index/*"
             - !GetAtt UserTable.Arn
             - !Sub "${UserTable.Arn}/index/*"
 
@@ -61,12 +62,29 @@ functions:
           path: /signup
           method: POST
 
+  documentProcessor:
+    handler: src.functions.document_processor.handler.handler
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - aws.s3
+            detail-type:
+              - Object Created
+            detail:
+              bucket:
+                name:
+                  - !Ref UploadsBucket
+
 resources:
   Resources:
     UploadsBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: docinsight-raw-documents
+        NotificationConfiguration:
+          EventBridgeConfiguration:
+            EventBridgeEnabled: true
 
     DocumentTable:
       Type: AWS::DynamoDB::Table
@@ -76,9 +94,18 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: s3_key
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: storage-key-index
+            KeySchema:
+              - AttributeName: s3_key
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
 
     UserTable:
       Type: AWS::DynamoDB::Table

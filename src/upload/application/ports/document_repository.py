@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.upload.domain.entities.document import Document
+from src.shared.domain.entities.document import Document
 
 
 class DocumentRepository(ABC):

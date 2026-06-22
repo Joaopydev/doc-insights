@@ -28,6 +28,22 @@ class DynamoDBClient(DBClient):
 
         return items[0] if items else None
 
+    def update_item(
+        self,
+        table_name: str,
+        key: dict,
+        update_expression: str,
+        expression_attribute_values: dict,
+        expression_attribute_names: dict | None = None
+    ):
+        table = self._get_table(table_name)
+
+        table.update_item(
+            Key=key,
+            UpdateExpression=update_expression,
+            ExpressionAttributeValues=expression_attribute_values,
+            ExpressionAttributeNames=expression_attribute_names or {}
+        )
 
     def _get_table(self, table_name: str):
         return self.__dynamodb_resource.Table(table_name)

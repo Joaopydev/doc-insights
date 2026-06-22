@@ -27,7 +27,7 @@ class UserRepository(UserRepositoryInterface):
         if not item:
             return None
 
-        return UserIdentity(**item)
+        return UserIdentity.restore(**item)
 
     def get_by_email(self, email: str) -> UserIdentity:
         item = self.db_client.query(
@@ -39,4 +39,4 @@ class UserRepository(UserRepositoryInterface):
         if not item:
             return None
 
-        return UserIdentity(**item)
+        return UserIdentity.restore(**item)

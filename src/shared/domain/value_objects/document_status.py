@@ -3,9 +3,7 @@ from enum import StrEnum
 
 class DocumentStatus(StrEnum):
     UPLOADING = "UPLOADING"
-    UPLOADED = "UPLOADED"
     EXTRACTING = "EXTRACTING"
-    EXTRACTED = "EXTRACTED"
     ANALYZING = "ANALYZING"
-    ANALYZED = "ANALYZED"
     FAILED = "FAILED"
+    COMPLETED = "COMPLETED"
