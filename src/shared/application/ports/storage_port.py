@@ -11,3 +11,10 @@ class StoragePort(ABC):
         expire_in: int
     ) -> str:
         pass
+
+    @abstractmethod
+    def read_object_content(
+        self,
+        key: str,
+    ) -> bytes:
+        pass

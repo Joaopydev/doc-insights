@@ -75,6 +75,9 @@ functions:
               bucket:
                 name:
                   - !Ref UploadsBucket
+              object:
+                key:
+                  - wildcard: "*/raw/*"
 
 resources:
   Resources:

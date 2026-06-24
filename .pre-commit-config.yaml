@@ -10,6 +10,7 @@ repos:
           - bcrypt
           - cryptography
           - python-dotenv
+          - PyMuPDF
         args:
           [
             "-rn",

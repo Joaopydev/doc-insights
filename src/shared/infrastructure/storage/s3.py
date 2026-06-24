@@ -1,7 +1,10 @@
 import boto3
+from botocore.exceptions import ClientError
+from botocore.response import StreamingBody
 
 from src.shared.application.ports.storage_port import StoragePort
 from src.main.config.settings import settings
+
 
 
 class S3Client(StoragePort):
@@ -24,3 +27,16 @@ class S3Client(StoragePort):
                 "ContentType": content_type
             }
         )
+
+
+    def read_object_content(self, key):
+        try:
+            obj = self.s3_client.get_object(
+                Bucket=settings.bucket_name,
+                Key=key,
+            )
+            streaming_body: StreamingBody = obj["Body"]
+
+            return streaming_body.read()
+        except ClientError as e:
+            raise RuntimeError(f"Failed to fetch object from s3: {e}") from e
