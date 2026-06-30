@@ -4,5 +4,5 @@ from abc import ABC, abstractmethod
 class TextExtractor(ABC):
 
     @abstractmethod
-    def extract(self, file_bytes: bytes) -> str:
+    def start_extraction(self, storage_key: str, document_id: str) -> str:
         pass

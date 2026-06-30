@@ -38,3 +38,18 @@ class DocumentProcessingRepository(DocumentProcessingRepositoryInterface):
                 ":status": status
             }
         )
+
+    def update_textract_job_id(self, document_id: str, job_id: str):
+        self.db_client.update_item(
+            table_name=settings.document_table,
+            key={
+                "id": document_id
+            },
+            update_expression="SET #textract_job_id = :textract_job_id",
+            expression_attribute_names={
+                "#textract_job_id": "textract_job_id"
+            },
+            expression_attribute_values={
+                ":textract_job_id": job_id
+            }
+        )

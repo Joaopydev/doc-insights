@@ -13,3 +13,7 @@ class DocumentProcessingRepository(ABC):
     @abstractmethod
     def update_status(self, document_id: str, status: str):
         pass
+
+    @abstractmethod
+    def update_textract_job_id(self, document_id: str, job_id: str):
+        pass

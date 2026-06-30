@@ -1,3 +1,4 @@
+from typing import Optional
 from datetime import datetime, UTC
 from dataclasses import dataclass
 from uuid import uuid4
@@ -17,6 +18,7 @@ class Document:
     metadata: FileMetadata | None
     status: DocumentStatus
     extracted_text_key: ExtractedTextKey
+    textract_job_id: Optional[str] = None
 
     created_at: datetime
     updated_at: datetime
@@ -82,6 +84,7 @@ class Document:
             "user_id": self.user_id,
             "s3_key": self.s3_key.get_value(),
             "extracted_text_key": self.extracted_text_key.get_value(),
+            "textract_job_id": self.textract_job_id,
             "metadata": self.metadata.to_dict(),
             "status": self.status.value,
             "created_at": self.created_at.isoformat(),
