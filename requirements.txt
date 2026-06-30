@@ -46,7 +46,7 @@ pydantic_core==2.46.4
 pydot==4.0.1
 PyJWT==2.13.0
 pylint==4.0.5
-PyMuPDF==1.27.2.3
+PyMuPDFb==1.23.22
 pyparsing==3.3.2
 python-dateutil==2.9.0.post0
 python-discovery==1.4.0

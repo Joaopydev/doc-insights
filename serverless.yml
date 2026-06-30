@@ -16,6 +16,8 @@ provider:
     USER_TABLE: !Ref UserTable
     JWT_PRIVATE_KEY: ${env:JWT_PRIVATE_KEY}
     JWT_PUBLIC_KEY: ${env:JWT_PUBLIC_KEY}
+    TEXTRACT_TOPIC_ARN: !Ref TextractTopic
+    TEXTRACT_ROLE_ARN: !Getatt TextractPublishRole.Arn
 
   iam:
     role:
@@ -40,6 +42,12 @@ provider:
             - !GetAtt UserTable.Arn
             - !Sub "${UserTable.Arn}/index/*"
 
+        - Effect: Allow
+          Action:
+            - textract:StartDocumentTextDetection
+            - textract:GetDocumentTextDetection
+          Resource: "*"
+
 functions:
   createDocument:
     handler: src.functions.create_document.handler.handler
@@ -62,8 +70,8 @@ functions:
           path: /signup
           method: POST
 
-  documentProcessor:
-    handler: src.functions.document_processor.handler.handler
+  startExtracting:
+    handler: src.functions.document_processor.start_extraction_text.handler
     events:
       - eventBridge:
           pattern:
@@ -79,8 +87,41 @@ functions:
                 key:
                   - wildcard: "*/raw/*"
 
+  textractCompleted:
+    handler: src.functions.document_processor.textract_completed.handler
+    events:
+      - sns:
+          arn: !Ref TextractTopic
+
 resources:
   Resources:
+    TextractTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: textract-document-completed
+
+    TextractPublishRole:
+      Type: AWS::SNS::Role
+      Properties:
+        RoleName: textract-publish-role
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: textract.amazonaws.com
+              Action: sts:AssumeRole
+
+        Policies:
+          - PolicyName: PublishToSNS
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - sns:Publish
+                  Resource: !Ref TextractTopic
+
     UploadsBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -99,6 +140,8 @@ resources:
             AttributeType: S
           - AttributeName: s3_key
             AttributeType: S
+          - AttributeName: textract_job_id
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
@@ -106,6 +149,13 @@ resources:
           - IndexName: storage-key-index
             KeySchema:
               - AttributeName: s3_key
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+          - IndexName: trextact-job-id
+            KeySchema:
+              - AttributeName: textract_job_id
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
