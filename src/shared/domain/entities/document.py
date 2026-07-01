@@ -2,6 +2,7 @@ from typing import Optional
 from datetime import datetime, UTC
 from dataclasses import dataclass
 from uuid import uuid4
+from pathlib import Path
 
 from src.shared.domain.value_objects.document_status import DocumentStatus
 from src.shared.domain.value_objects.file_metadata import FileMetadata
@@ -35,8 +36,10 @@ class Document:
         s3_key = S3Key(
             f"users/{user_id}/documents/{document_id}/raw/{file_metadata.filename}"
         )
+
+        filename = Path(file_metadata.filename).stem
         extracted_text_key = ExtractedTextKey(
-            f"users/{user_id}/documents/{document_id}/extracted/extracted_text_from_document.txt"
+            f"users/{user_id}/documents/{document_id}/extracted/{filename}.txt"
         )
 
         return cls(
@@ -63,15 +66,12 @@ class Document:
         updated_at: str,
         textract_job_id: Optional[str] = None
     ):
-        file_metadata = FileMetadata(**metadata)
-        s3_key = S3Key(s3_key)
-
         return cls(
             id=document_id,
             user_id=user_id,
-            metadata=file_metadata,
-            s3_key=s3_key,
-            extracted_text_key=extracted_text_key,
+            metadata=FileMetadata(**metadata),
+            s3_key=S3Key(s3_key),
+            extracted_text_key=ExtractedTextKey(extracted_text_key),
             status=DocumentStatus(status),
             created_at=datetime.fromisoformat(created_at),
             updated_at=datetime.fromisoformat(updated_at),

@@ -3,8 +3,5 @@ from typing import Dict, Any
 from src.main.composers.start_extraction_text_composer import StartExtractionTextComposer
 
 def handler(event: Dict[str, Any], context: Any):
-    try:
-        compose = StartExtractionTextComposer.compose()
-        compose(event["detail"]["object"]["key"])
-    except Exception as e:
-        print("Error: ", e)
+    compose = StartExtractionTextComposer.compose()
+    compose(event["detail"]["object"]["key"])

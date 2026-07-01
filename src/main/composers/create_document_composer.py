@@ -5,6 +5,7 @@ from src.shared.infrastructure.storage.s3 import S3Client
 
 from src.upload.infrastructure.repositories.document_repository import DocumentRepository
 from src.upload.application.use_cases.create_document import CreateDocumentUseCase
+from src.upload.presentation.controllers.create_document_controller import CreateDocumentController
 
 
 class CreateDocumentComposer:
@@ -17,4 +18,5 @@ class CreateDocumentComposer:
             document_repository=document_repository,
             storage_port=S3Client()
         )
-        return use_case.execute
+        controller = CreateDocumentController(use_case=use_case)
+        return controller.handle

@@ -3,11 +3,12 @@ from src.identity.application.ports.user_repository import (
 )
 from src.identity.application.ports.password_hasher import PasswordHasher
 from src.identity.domain.entities.user import UserIdentity
+from src.identity.application.use_cases.signup.user_signup_dto import (
+    SignupInput,
+    SignupOutput,
+)
 
 from src.shared.application.ports.jwt_port import JWTPort
-from src.shared.presentation.http_types.http_request import HTTPRequest
-from src.shared.presentation.http_types.http_response import HTTPResponse
-
 from src.errors.types.conflict_exception import EmailAlreadyExists
 
 
@@ -26,25 +27,22 @@ class UserSignupUseCase:
 
     def execute(
         self,
-        request: HTTPRequest,
-    ) -> HTTPResponse:
+        signup_input: SignupInput,
+    ) -> SignupOutput:
 
-        existing_user = self.user_repository.get_by_email(request.body["email"])
+        existing_user = self.user_repository.get_by_email(signup_input.email)
         if existing_user:
             raise EmailAlreadyExists()
 
         hashed_password = self.password_hasher.hash(
-            request.body["password"]
+            signup_input.password
         )
         user = UserIdentity.create(
-            name=request.body["name"],
-            email=request.body["email"],
+            name=signup_input.name,
+            email=signup_input.email,
             password=hashed_password,
         )
         self.user_repository.insert_user(user)
         access_token = self.jwt_port.signin_access_token(user.id)
 
-        return HTTPResponse(
-            status_code=201,
-            body={"access_token": access_token}
-        )
+        return SignupOutput(access_token=access_token)

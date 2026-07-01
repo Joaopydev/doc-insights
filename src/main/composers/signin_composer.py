@@ -4,8 +4,9 @@ from src.shared.infrastructure.dynamodb.client import DynamoDBClient
 from src.shared.infrastructure.security.jwt_service import JWTService
 
 from src.identity.infrastructure.repositories.user_repository import UserRepository
-from src.identity.application.use_cases.user_login import UserLoginUseCase
+from src.identity.application.use_cases.login.user_login import UserLoginUseCase
 from src.identity.infrastructure.security.password_hasher import PasswordHasher
+from src.identity.presentation.controllers.user_login_controller import UserLoginController
 
 
 class SinginComposer:
@@ -19,4 +20,5 @@ class SinginComposer:
             password_hasher=PasswordHasher(),
             jwt_port=JWTService(),
         )
-        return use_case.execute
+        controller = UserLoginController(use_case=use_case)
+        return controller.handle

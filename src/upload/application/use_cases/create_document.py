@@ -1,11 +1,14 @@
 from src.upload.application.ports.document_repository import (
     DocumentRepository as DocumentRepositoryInterface
 )
+from src.upload.application.use_cases.create_document_dto import (
+    CreateDocumentInput,
+    CreateDocumentOutput,
+)
 
 from src.shared.domain.entities.document import Document
 from src.shared.application.ports.storage_port import StoragePort
-from src.shared.presentation.http_types.http_request import HTTPRequest
-from src.shared.presentation.http_types.http_response import HTTPResponse
+
 
 
 class CreateDocumentUseCase:
@@ -20,12 +23,12 @@ class CreateDocumentUseCase:
 
     def execute(
         self,
-        request: HTTPRequest
-    ) -> HTTPResponse:
+        create_document_input: CreateDocumentInput
+    ) -> CreateDocumentOutput:
 
         document = Document.create(
-            user_id=request.user_id,
-            metadata=request.body["metadata"]
+            user_id=create_document_input.user_id,
+            metadata=create_document_input.metadata
         )
         self.document_repository.insert_document(document)
 
@@ -35,10 +38,7 @@ class CreateDocumentUseCase:
             expire_in=3600
         )
 
-        return HTTPResponse(
-            status_code=201,
-            body={
-                "document": document.to_dict(),
-                "presigned_url": presigned_url
-            }
+        return CreateDocumentOutput(
+            document=document,
+            presigned_url=presigned_url
         )

@@ -11,7 +11,7 @@ from src.shared.infrastructure.security.jwt_service import JWTService
 class APIGatewayRequestAdapter:
 
     @staticmethod
-    def adapt(event: dict, use_case: Callable, auth_required: bool = False) -> HTTPResponse:
+    def adapt(event: dict, controller: Callable, auth_required: bool = False) -> HTTPResponse:
         user_id = None
 
         if auth_required:
@@ -25,4 +25,4 @@ class APIGatewayRequestAdapter:
             user_id=user_id
         )
 
-        return use_case(http_request)
+        return controller(http_request)
