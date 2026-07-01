@@ -18,3 +18,11 @@ class StoragePort(ABC):
         key: str,
     ) -> bytes:
         pass
+
+    @abstractmethod
+    def put_object(
+        self, key: str,
+        body: any,
+        content_type: str
+    ) -> None:
+        pass

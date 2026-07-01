@@ -13,15 +13,13 @@ from src.shared.domain.value_objects.extracted_text_key import ExtractedTextKey
 class Document:
     id: str
     user_id: str
-
     s3_key: S3Key
+    extracted_text_key: ExtractedTextKey
     metadata: FileMetadata | None
     status: DocumentStatus
-    extracted_text_key: ExtractedTextKey
-    textract_job_id: Optional[str] = None
-
     created_at: datetime
     updated_at: datetime
+    textract_job_id: Optional[str] = None
 
     @classmethod
     def create(
@@ -38,7 +36,7 @@ class Document:
             f"users/{user_id}/documents/{document_id}/raw/{file_metadata.filename}"
         )
         extracted_text_key = ExtractedTextKey(
-            f"users/{user_id}/documents/{document_id}/extracted/text.txt"
+            f"users/{user_id}/documents/{document_id}/extracted/extracted_text_from_document.txt"
         )
 
         return cls(
@@ -63,6 +61,7 @@ class Document:
         status: str,
         created_at: str,
         updated_at: str,
+        textract_job_id: Optional[str] = None
     ):
         file_metadata = FileMetadata(**metadata)
         s3_key = S3Key(s3_key)
@@ -75,18 +74,23 @@ class Document:
             extracted_text_key=extracted_text_key,
             status=DocumentStatus(status),
             created_at=datetime.fromisoformat(created_at),
-            updated_at=datetime.fromisoformat(updated_at)
+            updated_at=datetime.fromisoformat(updated_at),
+            textract_job_id=textract_job_id,
         )
 
     def to_dict(self):
-        return {
+        attributes = {
             "id": self.id,
             "user_id": self.user_id,
             "s3_key": self.s3_key.get_value(),
             "extracted_text_key": self.extracted_text_key.get_value(),
-            "textract_job_id": self.textract_job_id,
             "metadata": self.metadata.to_dict(),
             "status": self.status.value,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
+
+        if self.textract_job_id:
+            attributes.update({"textract_job_id": self.textract_job_id})
+
+        return attributes

@@ -17,3 +17,7 @@ class DocumentProcessingRepository(ABC):
     @abstractmethod
     def update_textract_job_id(self, document_id: str, job_id: str):
         pass
+
+    @abstractmethod
+    def get_document_by_textract_job_id(self, job_id: str) -> Optional[Document]:
+        pass

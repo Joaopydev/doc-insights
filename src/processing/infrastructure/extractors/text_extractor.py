@@ -1,3 +1,4 @@
+from typing import List, Dict
 import boto3
 
 from src.processing.application.ports.text_extractor import (
@@ -27,3 +28,27 @@ class TextExtractor(TextExtractorInterface):
         )
 
         return response["JobId"]
+
+    def get_document_text(self, job_id: str) -> str:
+        blocks = []
+        next_token = None
+
+        while True:
+            kwargs = {"JobId": job_id}
+
+            if next_token:
+                kwargs["NextToken"] = next_token
+
+            response = self.textract.get_document_text_detection(**kwargs)
+            blocks.extend(response["Blocks"])
+
+            next_token = response.get("NextToken")
+
+            if not next_token:
+                break
+
+        return self._blocks_to_text(blocks)
+
+    def _blocks_to_text(self, blocks: List[Dict]) -> str:
+        lines = [block["Text"] for block in blocks if block["BlockType"] == "LINE"]
+        return "\n".join(lines)

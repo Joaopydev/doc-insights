@@ -40,3 +40,17 @@ class S3Client(StoragePort):
             return streaming_body.read()
         except ClientError as e:
             raise RuntimeError(f"Failed to fetch object from s3: {e}") from e
+
+
+    def put_object(
+        self,
+        key: str,
+        body: any,
+        content_type: str
+    ) -> None:
+        self.s3_client.put_object(
+            Bucket=settings.bucket_name,
+            Key=key,
+            Body=body,
+            ContentType=content_type,
+        )

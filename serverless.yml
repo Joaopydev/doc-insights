@@ -17,7 +17,7 @@ provider:
     JWT_PRIVATE_KEY: ${env:JWT_PRIVATE_KEY}
     JWT_PUBLIC_KEY: ${env:JWT_PUBLIC_KEY}
     TEXTRACT_TOPIC_ARN: !Ref TextractTopic
-    TEXTRACT_ROLE_ARN: !Getatt TextractPublishRole.Arn
+    TEXTRACT_ROLE_ARN: !GetAtt TextractPublishRole.Arn
 
   iam:
     role:
@@ -89,9 +89,6 @@ functions:
 
   textractCompleted:
     handler: src.functions.document_processor.textract_completed.handler
-    events:
-      - sns:
-          arn: !Ref TextractTopic
 
 resources:
   Resources:
@@ -101,7 +98,7 @@ resources:
         TopicName: textract-document-completed
 
     TextractPublishRole:
-      Type: AWS::SNS::Role
+      Type: AWS::IAM::Role
       Properties:
         RoleName: textract-publish-role
         AssumeRolePolicyDocument:
@@ -121,6 +118,21 @@ resources:
                   Action:
                     - sns:Publish
                   Resource: !Ref TextractTopic
+
+    TextractSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn: !Ref TextractTopic
+        Protocol: lambda
+        Endpoint: !GetAtt TextractCompletedLambdaFunction.Arn
+
+    TextractPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName: !Ref TextractCompletedLambdaFunction
+        Action: lambda:InvokeFunction
+        Principal: sns.amazonaws.com
+        SourceArn: !Ref TextractTopic
 
     UploadsBucket:
       Type: AWS::S3::Bucket
@@ -153,7 +165,7 @@ resources:
             Projection:
               ProjectionType: ALL
 
-          - IndexName: trextact-job-id
+          - IndexName: textract-job-id-index
             KeySchema:
               - AttributeName: textract_job_id
                 KeyType: HASH
