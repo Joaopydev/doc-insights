@@ -9,6 +9,7 @@ repos:
           - PyJWT
           - bcrypt
           - cryptography
+          - psycopg[binary]
         args:
           [
             "-rn",

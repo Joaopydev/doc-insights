@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     textract_topic_arn: str
     textract_role_arn: str
 
+    neon_database_url: str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",
