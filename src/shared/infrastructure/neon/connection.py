@@ -4,7 +4,7 @@ from psycopg import connect, Connection
 from src.main.config.settings import settings
 
 
-class NeonConnection:
+class VectorDatabaseConnection:
 
     _connection: Optional[Connection] = None
 
