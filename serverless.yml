@@ -154,6 +154,8 @@ resources:
             AttributeType: S
           - AttributeName: textract_job_id
             AttributeType: S
+          - AttributeName: extracted_text_key
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
@@ -168,6 +170,13 @@ resources:
           - IndexName: textract-job-id-index
             KeySchema:
               - AttributeName: textract_job_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+          - IndexName: extracted-text-key-index
+            KeySchema:
+              - AttributeName: extracted_text_key
                 KeyType: HASH
             Projection:
               ProjectionType: ALL

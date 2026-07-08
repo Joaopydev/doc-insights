@@ -86,3 +86,26 @@ class DocumentProcessingRepository(DocumentProcessingRepositoryInterface):
             updated_at=item["updated_at"],
             textract_job_id=item["textract_job_id"]
         )
+
+    def get_document_by_extracted_text_key(self, key: str) -> Optional[Document]:
+        item = self.db_client.query(
+            table_name=settings.document_table,
+            index_name="extracted-text-key-index",
+            key_name="extracted_text_key",
+            key_value=key,
+        )
+
+        if not item:
+            return None
+
+        return Document.restore(
+            document_id=item["id"],
+            user_id=item["user_id"],
+            s3_key=item["s3_key"],
+            extracted_text_key=item["extracted_text_key"],
+            metadata=item["metadata"],
+            status=item["status"],
+            created_at=item["created_at"],
+            updated_at=item["updated_at"],
+            textract_job_id=item["textract_job_id"]
+        )

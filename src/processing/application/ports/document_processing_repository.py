@@ -21,3 +21,7 @@ class DocumentProcessingRepository(ABC):
     @abstractmethod
     def get_document_by_textract_job_id(self, job_id: str) -> Optional[Document]:
         pass
+
+    @abstractmethod
+    def get_document_by_extracted_text_key(self, key: str) -> Optional[Document]:
+        pass
