@@ -9,7 +9,7 @@ def handler(event: Dict[str, Any], context: Any):
     try:
         http_response = APIGatewayRequestAdapter.adapt(
             event=event,
-            use_case=CreateDocumentComposer.compose(),
+            controller=CreateDocumentComposer.compose(),
             auth_required=True,
         )
     except Exception as e:

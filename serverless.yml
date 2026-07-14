@@ -4,18 +4,23 @@ service: document-analyzer-api
 custom:
   pythonRequirements:
     dockerizePip: true
+    slim: false
+    noDeploy:
+      - boto3
+      - botocore
 
 provider:
   name: aws
   region: us-east-1
   runtime: python3.11
-  architecture: arm64
+  architecture: x86_64
   environment:
     BUCKET_NAME: !Ref UploadsBucket
     DOCUMENT_TABLE: !Ref DocumentTable
     USER_TABLE: !Ref UserTable
     JWT_PRIVATE_KEY: ${env:JWT_PRIVATE_KEY}
     JWT_PUBLIC_KEY: ${env:JWT_PUBLIC_KEY}
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
     TEXTRACT_TOPIC_ARN: !Ref TextractTopic
     TEXTRACT_ROLE_ARN: !GetAtt TextractPublishRole.Arn
 
@@ -46,6 +51,8 @@ provider:
           Action:
             - textract:StartDocumentTextDetection
             - textract:GetDocumentTextDetection
+            - textract:StartDocumentAnalysis
+            - textract:GetDocumentAnalysis
           Resource: "*"
 
 functions:
@@ -86,6 +93,23 @@ functions:
               object:
                 key:
                   - wildcard: "*/raw/*"
+
+  indexDocument:
+    handler: src.functions.document_processor.index_document.handler
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - aws.s3
+            detail-type:
+              - Object Created
+            detail:
+              bucket:
+                name:
+                  - !Ref UploadsBucket
+              object:
+                key:
+                  - wildcard: "*/extracted/*"
 
   textractCompleted:
     handler: src.functions.document_processor.textract_completed.handler

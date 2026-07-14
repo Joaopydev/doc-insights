@@ -10,7 +10,7 @@ class ContentType(str, Enum):
     # JPG = "image/jpg"
 
 class DocumentMetadataInput(BaseModel):
-    file_name: str
+    filename: str
     content_type: ContentType
 
 class CreateDocumentInput(BaseModel):

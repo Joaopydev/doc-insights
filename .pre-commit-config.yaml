@@ -11,6 +11,7 @@ repos:
           - cryptography
           - psycopg[binary]
           - langchain_text_splitters
+          - openai
         args:
           [
             "-rn",

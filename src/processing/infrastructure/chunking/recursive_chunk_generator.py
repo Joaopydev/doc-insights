@@ -10,8 +10,9 @@ class RecursiveChunkGenerator(ChunkGeneratorInterface):
 
     def __init__(self):
         self.splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-            chunk_size=1000,
-            chunk_overlap=200,
+            encoding_name="cl100k_base",
+            chunk_size=850,
+            chunk_overlap=150,
         )
 
     def generate_chunks(self, text: str) -> List[str]:

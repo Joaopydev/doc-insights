@@ -9,7 +9,7 @@ def handler(event: Dict[str, Any], context: Any):
     try:
         http_response = APIGatewayRequestAdapter.adapt(
             event=event,
-            use_case=SinginComposer.compose(),
+            controller=SinginComposer.compose(),
         )
     except Exception as e:
         http_response = ExceptionResponseBuilder.build(e)

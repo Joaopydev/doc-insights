@@ -5,5 +5,5 @@ from typing import List
 class EmbeddingGenerator(ABC):
 
     @abstractmethod
-    def generate_embedding(self, text: str) -> List[float]:
+    async def generate_embedding(self, chunks: List[str]) -> List[float]:
         pass
