@@ -1,7 +1,7 @@
 import asyncio
 from typing import Dict, Any
 
-from src.main.composers.index_document_compose import IndexDocumentComposer
+from src.main.composers.index_document_composer import IndexDocumentComposer
 
 
 async def async_handler(event: Dict[str, Any], context: Any):

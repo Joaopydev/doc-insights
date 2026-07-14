@@ -6,7 +6,6 @@ certifi==2026.6.17
 cffi==2.0.0
 charset-normalizer==3.4.7
 cryptography==49.0.0
-email-validator
 idna==3.18
 jmespath==1.1.0
 langchain_text_splitters==1.1.2

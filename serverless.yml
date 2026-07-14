@@ -4,7 +4,7 @@ service: document-analyzer-api
 custom:
   pythonRequirements:
     dockerizePip: true
-    slim: false
+    slim: true
     noDeploy:
       - boto3
       - botocore
@@ -54,6 +54,8 @@ provider:
             - textract:StartDocumentAnalysis
             - textract:GetDocumentAnalysis
           Resource: "*"
+package:
+  individually: true
 
 functions:
   createDocument:
@@ -78,7 +80,7 @@ functions:
           method: POST
 
   startExtracting:
-    handler: src.functions.document_processor.start_extraction_text.handler
+    handler: src.functions.start_extraction_text.handler.handler
     events:
       - eventBridge:
           pattern:
@@ -95,7 +97,7 @@ functions:
                   - wildcard: "*/raw/*"
 
   indexDocument:
-    handler: src.functions.document_processor.index_document.handler
+    handler: src.functions.index_document.handler.handler
     events:
       - eventBridge:
           pattern:
@@ -112,7 +114,7 @@ functions:
                   - wildcard: "*/extracted/*"
 
   textractCompleted:
-    handler: src.functions.document_processor.textract_completed.handler
+    handler: src.functions.textract_completed.handler.handler
 
 resources:
   Resources:

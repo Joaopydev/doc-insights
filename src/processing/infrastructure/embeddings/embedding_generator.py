@@ -11,5 +11,5 @@ class EmbeddingGenerator(EmbddingGeneratorInterface):
     def __init__(self, ai_client: AIClient):
         self.ai_client = ai_client
 
-    async def generate_embedding(self, chunks: List[str]) -> List[float]:
-        return await self.ai_client.embedings_create(chunks)
+    async def generate_embedding(self, chunks: List[str]) -> List[List[float]]:
+        return await self.ai_client.embeddings_create(chunks)
