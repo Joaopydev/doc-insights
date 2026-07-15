@@ -13,7 +13,7 @@ from src.shared.infrastructure.ai.client import OpenAIClient
 class IndexDocumentComposer:
 
     @staticmethod
-    async def compose() -> Awaitable:
+    def compose() -> Awaitable:
         repository = DocumentProcessingRepository(DynamoDBClient())
         chunk_generator = RecursiveChunkGenerator()
         embedding_generator = EmbeddingGenerator(OpenAIClient())
