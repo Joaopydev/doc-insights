@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 from typing import Optional
 from psycopg import connect, Connection
 
@@ -6,12 +7,20 @@ from src.main.config.settings import settings
 
 class VectorDatabaseConnection:
 
-    _connection: Optional[Connection] = None
+    def __init__(self):
+        self.connection: Optional[Connection] = None
 
-    @classmethod
-    def get_connection(cls) -> Connection:
+    def __enter__(self) -> Connection:
+        self.connection = connect(settings.neon_database_url)
+        return self.connection
 
-        if cls._connection is None or cls._connection.closed:
-            cls._connection = connect(settings.neon_database_url)
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        if self.connection is None:
+            return
 
-        return cls._connection
+        if exc_type:
+            self.connection.rollback()
+        else:
+            self.connection.commit()
+
+        self.connection.close()
