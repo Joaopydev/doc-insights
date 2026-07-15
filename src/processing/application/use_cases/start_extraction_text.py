@@ -21,9 +21,10 @@ class StartExtractionTextUseCase:
 
         if document.status in [
             DocumentStatus.FAILED,
-            DocumentStatus.COMPLETED,
+            DocumentStatus.READY,
             DocumentStatus.EXTRACTING,
             DocumentStatus.EXTRACTED,
+            DocumentStatus.INDEXING,
         ]:
             return
 

@@ -18,11 +18,12 @@ provider:
     BUCKET_NAME: !Ref UploadsBucket
     DOCUMENT_TABLE: !Ref DocumentTable
     USER_TABLE: !Ref UserTable
+    TEXTRACT_TOPIC_ARN: !Ref TextractTopic
+    TEXTRACT_ROLE_ARN: !GetAtt TextractPublishRole.Arn
     JWT_PRIVATE_KEY: ${env:JWT_PRIVATE_KEY}
     JWT_PUBLIC_KEY: ${env:JWT_PUBLIC_KEY}
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
-    TEXTRACT_TOPIC_ARN: !Ref TextractTopic
-    TEXTRACT_ROLE_ARN: !GetAtt TextractPublishRole.Arn
+    NEON_DATABASE_URL: ${env:NEON_DATABASE_URL}
 
   iam:
     role:
@@ -49,8 +50,6 @@ provider:
 
         - Effect: Allow
           Action:
-            - textract:StartDocumentTextDetection
-            - textract:GetDocumentTextDetection
             - textract:StartDocumentAnalysis
             - textract:GetDocumentAnalysis
           Resource: "*"
@@ -59,28 +58,40 @@ package:
 
 functions:
   createDocument:
-    handler: src.functions.create_document.handler.handler
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.create_document.handler.handler
     events:
       - httpApi:
           path: /document
           method: POST
 
   signin:
-    handler: src.functions.signin.handler.handler
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.signin.handler.handler
     events:
       - httpApi:
           path: /signin
           method: POST
 
   signup:
-    handler: src.functions.signup.handler.handler
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.signup.handler.handler
     events:
       - httpApi:
           path: /signup
           method: POST
 
   startExtracting:
-    handler: src.functions.start_extraction_text.handler.handler
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.start_extraction_text.handler.handler
     events:
       - eventBridge:
           pattern:
@@ -97,7 +108,10 @@ functions:
                   - wildcard: "*/raw/*"
 
   indexDocument:
-    handler: src.functions.index_document.handler.handler
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.index_document.handler.handler
     events:
       - eventBridge:
           pattern:
@@ -114,7 +128,10 @@ functions:
                   - wildcard: "*/extracted/*"
 
   textractCompleted:
-    handler: src.functions.textract_completed.handler.handler
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.textract_completed.handler.handler
 
 resources:
   Resources:
