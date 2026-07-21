@@ -41,6 +41,9 @@ class IndexDocumentUseCase:
         chunks = self.chunk_generator.generate_chunks(extracted_text.decode("utf-8"))
         embeddings = await self.embedding_generator.generate_embedding(chunks)
 
+        print("Chunks generated:", len(chunks))
+        print("Embeddings generated:", len(embeddings))
+
         document_chunks = self.chunk_generator.generate_document_chunks(
             document_id=document.id,
             chunks=chunks,
