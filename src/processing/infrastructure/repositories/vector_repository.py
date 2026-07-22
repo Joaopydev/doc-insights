@@ -16,29 +16,25 @@ class VectorRepository(VectorRepositoryInterface):
     def store_chunks(self, chunks: List[DocumentChunk]):
         with self.connection as conn:
             with conn.cursor() as cur:
-                try:
-                    for chunk in chunks:
-                        cur.execute(
-                            """
-                            INSERT INTO document_chunks (
-                                id,
-                                document_id,
-                                chunk_order,
-                                content,
-                                embedding,
-                                created_at
-                            )
-                            VALUES (%s, %s, %s, %s, %s, %s)
-                            """,
-                            (
-                                chunk.id,
-                                chunk.document_id,
-                                chunk.chunk_order,
-                                chunk.content,
-                                chunk.embedding,
-                                chunk.created_at,
-                            )
+                for chunk in chunks:
+                    cur.execute(
+                        """
+                        INSERT INTO document_chunks (
+                            id,
+                            document_id,
+                            chunk_order,
+                            content,
+                            embedding,
+                            created_at
                         )
-                except Exception as e:
-                    print("Error storing chunks:", e)
-                    raise
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        """,
+                        (
+                            chunk.id,
+                            chunk.document_id,
+                            chunk.chunk_order,
+                            chunk.content,
+                            chunk.embedding,
+                            chunk.created_at,
+                        )
+                    )
