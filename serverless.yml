@@ -116,6 +116,7 @@ functions:
               object:
                 key:
                   - wildcard: "*/extracted/*"
+    timeout: 30
 
   textractCompleted:
     image:
