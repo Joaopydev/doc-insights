@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     bucket_name: str
     document_table: str
     user_table: str
+    chat_table: str
 
     jwt_private_key: str
     jwt_public_key: str
