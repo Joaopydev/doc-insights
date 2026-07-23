@@ -245,6 +245,12 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: conversation_id
+            AttributeType: S
+          - AttributeName: user_id
+            AttributeType: S
+          - AttributeName: document_id
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
