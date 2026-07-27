@@ -12,6 +12,7 @@ repos:
           - psycopg[binary]
           - langchain_text_splitters
           - openai
+          - pgvector
         args:
           [
             "-rn",
