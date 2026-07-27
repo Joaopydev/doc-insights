@@ -25,7 +25,7 @@ class QuestionProcessingUseCase:
         message_embedding = await self.embedding_generator.generate_embedding([message.content])
         document_chunks = self.vector_repository.semantic_similarity_search(
             embedding=message_embedding[0],
-            document_id=message.document_id,
+            document_id=event.document_id,
         )
 
         print(f"Retrieval Chunks: {document_chunks}")

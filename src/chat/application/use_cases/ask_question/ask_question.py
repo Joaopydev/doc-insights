@@ -60,6 +60,7 @@ class AskQuestionUseCase:
         self.event_publisher.publish(
             QuestionAskedEvent(
                 message_id=message.id,
+                document_id=document.id,
             )
         )
 
