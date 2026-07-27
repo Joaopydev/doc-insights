@@ -41,6 +41,10 @@ provider:
             - !Sub "${DocumentTable.Arn}/index/*"
             - !GetAtt UserTable.Arn
             - !Sub "${UserTable.Arn}/index/*"
+            - !GetAtt ChatTable.Arn
+            - !Sub "${ChatTable.Arn}/index/*"
+            - !GetAtt ConversationTable
+            - !Sub "${ConversationTable.Arn}/index/*"
 
         - Effect: Allow
           Action:
