@@ -15,7 +15,6 @@ class QuestionController(ControllerInterface):
         input_data = AskQuestionInput(
             user_id=request.user_id,
             document_id=request.body["document_id"],
-            conversation_id=request.body["conversation_id"],
             question=request.body["question"]
         )
 

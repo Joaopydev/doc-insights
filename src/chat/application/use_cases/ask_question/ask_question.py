@@ -9,10 +9,12 @@ from src.chat.application.events.question_asked_event import QuestionAskedEvent
 from src.chat.application.ports.document_repository import DocumentRepository
 
 from src.errors.types.document_not_found import DocumentNotFound
+from src.errors.types.document_not_ready import DocumentNotReady
 from src.errors.types.unauthorized_document_access import UnauthorizedDocumentAccess
 
 
 from src.shared.application.ports.event_publisher import EventPublisher
+from src.shared.domain.value_objects.document_status import DocumentStatus
 
 class AskQuestionUseCase:
 
@@ -34,6 +36,9 @@ class AskQuestionUseCase:
         document = self.document_repository.get_document_by_id(question_input.document_id)
         if not document:
             raise DocumentNotFound("Document not found.")
+
+        if document.status != DocumentStatus.READY:
+            raise DocumentNotReady("It's not possible to proceed with the current state of the document")
 
         if question_input.user_id != document.user_id:
             raise UnauthorizedDocumentAccess("The current user is not the owner of the document")
