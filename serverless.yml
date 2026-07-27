@@ -131,6 +131,10 @@ functions:
       uri: ${env:ECR_IMAGE_URI}
       command:
         - src.functions.ask_question.handler.handler
+    events:
+      - httpApi:
+          path: /chat
+          method: POST
 
   questionProcessing:
     image:
