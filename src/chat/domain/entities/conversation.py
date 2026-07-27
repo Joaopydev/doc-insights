@@ -48,5 +48,5 @@ class Conversation:
             "id": self.id,
             "document_id": self.document_id,
             "user_id": self.user_id,
-            "created_at": self.created_at,
+            "created_at": self.created_at.isoformat(),
         }

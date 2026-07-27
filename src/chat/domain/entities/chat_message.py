@@ -48,5 +48,5 @@ class ChatMessage:
             "id": self.id,
             "conversation_id": self.conversation_id,
             "content": self.content,
-            "created_at": self.created_at,
+            "created_at": self.created_at.isoformat(),
         }
