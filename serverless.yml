@@ -58,7 +58,7 @@ provider:
         - Effect: Allow
           Action:
             - events:PutEvents
-          Resoucer:
+          Resource:
             - arn:aws:events:us-east-1:553004107808:event-bus/default
 
 functions:
