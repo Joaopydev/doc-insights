@@ -21,3 +21,22 @@ class ChatRepository(ChatRepositoryInterface):
             table_name=settings.chat_table,
             item=chat_message.to_dict()
         )
+
+    def get_message_by_id(self, message_id: str) -> ChatMessage:
+        item = self.db_client.get_item(
+            table_name=settings.chat_table,
+            key={
+                "id": message_id
+            }
+        )
+        if not item:
+            return None
+
+        return ChatMessage.restore(
+            message_id=item["id"],
+            document_id=item["document_id"],
+            conversation_id=item["conversation_id"],
+            user_id=item["user_id"],
+            content=item["content"],
+            created_at=item["created_at"],
+        )

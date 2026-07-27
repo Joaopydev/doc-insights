@@ -38,3 +38,50 @@ class VectorRepository(VectorRepositoryInterface):
                             chunk.created_at,
                         )
                     )
+
+    def semantic_similarity_search(
+        self,
+        embedding: List[float],
+        document_id: str,
+        limit: int = 5
+    ) -> List[DocumentChunk]:
+
+        with self.connection as conn:
+            with conn.cursor() as cur:
+
+                cur.execute(
+                    """
+                    SELECT
+                        id,
+                        document_id,
+                        chunk_order,
+                        content,
+                        embedding,
+                        created_at,
+                        embedding <=> %s AS distance
+                    FROM document_chunks
+                    WHERE document_id = %s
+                    ORDER BY embedding <=> %s
+                    LIMIT %s
+                    """,
+                    (
+                        embedding,
+                        document_id,
+                        embedding,
+                        limit
+                    )
+                )
+
+                rows = cur.fetchall()
+
+                return [
+                    DocumentChunk(
+                        id=row[0],
+                        document_id=row[1],
+                        chunk_order=row[2],
+                        content=row[3],
+                        embedding=row[4],
+                        created_at=row[5]
+                    )
+                    for row in rows
+                ]

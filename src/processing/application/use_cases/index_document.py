@@ -1,8 +1,8 @@
 from src.processing.application.ports.chunk_generator import ChunkGenerator
-from src.processing.application.ports.embedding_generator import EmbeddingGenerator
 from src.processing.application.ports.document_processing_repository import DocumentProcessingRepository
-from src.processing.application.ports.vector_repository import VectorRepository
 
+from src.processing.application.ports.vector_repository import VectorRepository
+from src.shared.application.ports.embedding_generator import EmbeddingGenerator
 from src.shared.domain.value_objects.document_status import DocumentStatus
 from src.shared.application.ports.storage_port import StoragePort
 

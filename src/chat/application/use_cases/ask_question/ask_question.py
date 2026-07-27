@@ -1,4 +1,4 @@
-from src.chat.application.use_cases.ask_question_dto import (
+from src.chat.application.use_cases.ask_question.ask_question_dto import (
     AskQuestionInput,
     AskQuestionOutput,
 )
@@ -28,7 +28,7 @@ class AskQuestionUseCase:
             document_id=question_input.document_id,
             conversation_id=question_input.conversation_id,
             user_id=question_input.user_id,
-            message=question_input.question,
+            content=question_input.question,
         )
 
         self.chat_repository.save_message(message)
@@ -36,9 +36,6 @@ class AskQuestionUseCase:
         self.event_publisher.publish(
             QuestionAskedEvent(
                 message_id=message.id,
-                conversation_id=message.conversation_id,
-                document_id=message.document_id,
-                user_id=message.user_id,
             )
         )
 

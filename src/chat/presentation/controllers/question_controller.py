@@ -1,5 +1,5 @@
-from src.chat.application.use_cases.ask_question import AskQuestionUseCase
-from src.chat.application.use_cases.ask_question_dto import AskQuestionInput
+from src.chat.application.use_cases.ask_question.ask_question import AskQuestionUseCase
+from src.chat.application.use_cases.ask_question.ask_question_dto import AskQuestionInput
 
 from src.shared.presentation.http_types.http_request import HTTPRequest
 from src.shared.presentation.http_types.http_response import HTTPResponse

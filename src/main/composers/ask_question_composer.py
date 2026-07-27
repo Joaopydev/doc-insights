@@ -1,8 +1,8 @@
 from typing import Callable
 
 from src.chat.presentation.controllers.question_controller import QuestionController
-from src.chat.application.use_cases.ask_question import AskQuestionUseCase
-from src.chat.infrastructure.chat_repository import ChatRepository
+from src.chat.application.use_cases.ask_question.ask_question import AskQuestionUseCase
+from src.chat.infrastructure.repositories.chat_repository import ChatRepository
 
 from src.shared.infrastructure.eventbridge.client import EventBridgeClient
 from src.shared.infrastructure.dynamodb.client import DynamoDBClient

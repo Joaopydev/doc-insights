@@ -10,7 +10,7 @@ class ChatMessage:
     document_id: str
     conversation_id: str
     user_id: str
-    message: str
+    content: str
     created_at: datetime
 
     @classmethod
@@ -19,7 +19,7 @@ class ChatMessage:
         document_id: str,
         conversation_id: str,
         user_id: str,
-        message: str,
+        content: str,
     ) -> "ChatMessage":
         message_id = str(uuid4())
         created_at = datetime.now(UTC)
@@ -29,7 +29,7 @@ class ChatMessage:
             document_id=document_id,
             conversation_id=conversation_id,
             user_id=user_id,
-            message=message,
+            content=content,
             created_at=created_at,
         )
 
@@ -40,7 +40,7 @@ class ChatMessage:
         document_id: str,
         conversation_id: str,
         user_id: str,
-        message: str,
+        content: str,
         created_at: datetime,
     ) -> "ChatMessage":
 
@@ -49,7 +49,7 @@ class ChatMessage:
             document_id=document_id,
             conversation_id=conversation_id,
             user_id=user_id,
-            message=message,
+            content=content,
             created_at=created_at,
         )
 
@@ -59,6 +59,6 @@ class ChatMessage:
             "document_id": self.document_id,
             "conversation_id": self.conversation_id,
             "user_id": self.user_id,
-            "message": self.message,
+            "content": self.content,
             "created_at": self.created_at,
         }
