@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     document_table: str
     user_table: str
     chat_table: str
+    conversation_table: str
 
     jwt_private_key: str
     jwt_public_key: str

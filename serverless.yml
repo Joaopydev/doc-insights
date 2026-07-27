@@ -11,6 +11,7 @@ provider:
     DOCUMENT_TABLE: !Ref DocumentTable
     CHAT_TABLE: !Ref ChatTable
     USER_TABLE: !Ref UserTable
+    CONVERSATION_TABLE: !Ref ConversationTable
     TEXTRACT_TOPIC_ARN: !Ref TextractTopic
     TEXTRACT_ROLE_ARN: !GetAtt TextractPublishRole.Arn
     JWT_PRIVATE_KEY: ${env:JWT_PRIVATE_KEY}
@@ -267,8 +268,6 @@ resources:
             AttributeType: S
           - AttributeName: conversation_id
             AttributeType: S
-          - AttributeName: user_id
-            AttributeType: S
           - AttributeName: document_id
             AttributeType: S
         KeySchema:
@@ -282,13 +281,27 @@ resources:
             Projection:
               ProjectionType: ALL
 
-          - IndexName: user-id-index
+          - IndexName: document-id-index
             KeySchema:
-              - AttributeName: user_id
+              - AttributeName: document_id
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
 
+    ConversationTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: conversation-table
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: document_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
           - IndexName: document-id-index
             KeySchema:
               - AttributeName: document_id
