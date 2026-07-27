@@ -49,6 +49,8 @@ class VectorRepository(VectorRepositoryInterface):
         with self.connection as conn:
             with conn.cursor() as cur:
 
+                query_vector = "[" + ",".join(map(str, embedding)) + "]"
+
                 cur.execute(
                     """
                     SELECT
@@ -58,16 +60,16 @@ class VectorRepository(VectorRepositoryInterface):
                         content,
                         embedding,
                         created_at,
-                        embedding <=> %s AS distance
+                        embedding <=> %s::vector AS distance
                     FROM document_chunks
                     WHERE document_id = %s
-                    ORDER BY embedding <=> %s
+                    ORDER BY embedding <=> %s::vector
                     LIMIT %s
                     """,
                     (
-                        embedding,
+                        query_vector,
                         document_id,
-                        embedding,
+                        query_vector,
                         limit
                     )
                 )
