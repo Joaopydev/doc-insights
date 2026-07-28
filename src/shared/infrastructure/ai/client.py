@@ -1,17 +1,38 @@
 from typing import List
 from openai import AsyncOpenAI
 
-from src.shared.application.ports.ai_client import AIClient as AIClientInterface
+from src.shared.application.ports.ai_client import AIClient
+from src.shared.application.prompts.question_answer_prompt import QuestionAnswerPrompt
 
 
-client = AsyncOpenAI()
+class OpenAIClient(AIClient):
 
-
-class OpenAIClient(AIClientInterface):
+    def __init__(self) -> None:
+        self.client = AsyncOpenAI()
 
     async def create_embeddings(self, chunks: List[str]) -> List[List[float]]:
-        response = await client.embeddings.create(
+        response = await self.client.embeddings.create(
             model="text-embedding-3-small",
             input=chunks
         )
         return [item.embedding for item in response.data]
+
+    async def generate_response(
+        self,
+        question: str,
+        context: str,
+    ):
+        reponse = await self.client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": QuestionAnswerPrompt.build(context),
+                },
+                {
+                    "role": "user",
+                    "content": question
+                }
+            ]
+        )
+        return reponse.choices[0].message.content

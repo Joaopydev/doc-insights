@@ -39,6 +39,7 @@ class ChatRepository(ChatRepositoryInterface):
             message_id=item["id"],
             conversation_id=item["conversation_id"],
             content=item["content"],
+            message_type=item["message_type"],
             created_at=item["created_at"],
         )
 

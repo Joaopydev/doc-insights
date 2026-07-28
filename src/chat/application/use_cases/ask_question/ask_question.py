@@ -5,6 +5,7 @@ from src.chat.application.use_cases.ask_question.ask_question_dto import (
 from src.chat.application.ports.chat_repository import ChatRepository
 from src.chat.domain.entities.chat_message import ChatMessage
 from src.chat.domain.entities.conversation import Conversation
+from src.chat.domain.value_objects.message_type import MessageType
 from src.chat.application.events.question_asked_event import QuestionAskedEvent
 from src.chat.application.ports.document_repository import DocumentRepository
 
@@ -54,6 +55,7 @@ class AskQuestionUseCase:
         message = ChatMessage.create(
             conversation_id=conversation.id,
             content=question_input.question,
+            message_type=MessageType.QUESTION
         )
         self.chat_repository.save_message(message)
 
