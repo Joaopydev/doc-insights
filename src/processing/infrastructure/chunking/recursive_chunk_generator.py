@@ -4,7 +4,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from src.processing.application.ports.chunk_generator import (
     ChunkGenerator as ChunkGeneratorInterface
 )
-from src.processing.domain.entities.chunk import DocumentChunk
+from src.shared.domain.entities.chunk import DocumentChunk
 
 
 class RecursiveChunkGenerator(ChunkGeneratorInterface):

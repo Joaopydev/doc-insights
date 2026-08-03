@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from src.chat.domain.entities.chat_message import ChatMessage
 from src.chat.domain.entities.conversation import Conversation
@@ -65,3 +65,41 @@ class ChatRepository(ChatRepositoryInterface):
             user_id=item["user_id"],
             created_at=item["created_at"],
         )
+
+    def get_conversation_by_id(self, conversation_id: str) -> Optional[Conversation]:
+        item = self.db_client.get_item(
+            table_name=settings.conversation_table,
+            key={
+                "id": conversation_id
+            }
+        )
+        if not item:
+            return None
+
+        return Conversation.restore(
+            conversation_id=item["id"],
+            document_id=item["document_id"],
+            user_id=item["user_id"],
+            created_at=item["created_at"],
+        )
+
+    def get_messages(self, conversation_id: str) -> List[ChatMessage]:
+        items = self.db_client.query_many(
+            table_name=settings.chat_table,
+            index_name="conversation-id-index",
+            key_name="conversation_id",
+            key_value=conversation_id,
+        )
+        if not items:
+            return []
+
+        return [
+            ChatMessage.restore(
+                message_id=item["id"],
+                conversation_id=item["conversation_id"],
+                content=item["content"],
+                message_type=item["message_type"],
+                created_at=item["created_at"],
+            )
+            for item in items
+        ]

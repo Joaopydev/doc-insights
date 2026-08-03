@@ -39,3 +39,13 @@ class DBClient(ABC):
         expression_attribute_names: dict | None = None
     ):
         pass
+
+    @abstractmethod
+    def query_many(
+        self,
+        table_name: str,
+        index_name: str,
+        key_name: str,
+        key_value: str,
+    ):
+        pass

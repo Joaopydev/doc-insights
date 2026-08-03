@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from src.processing.domain.entities.chunk import DocumentChunk
+from src.shared.domain.entities.chunk import DocumentChunk
 
 
 class VectorRepository(ABC):

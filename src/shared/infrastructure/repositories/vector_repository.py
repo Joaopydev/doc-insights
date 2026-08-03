@@ -1,12 +1,13 @@
 # pylint: disable=no-member
 from typing import List
 
-from src.processing.application.ports.vector_repository import (
+from src.shared.application.ports.vector_repository import (
     VectorRepository as VectorRepositoryInterface
 )
-from src.processing.domain.entities.chunk  import DocumentChunk
-
 from src.shared.infrastructure.neon.connection import VectorDatabaseConnection
+
+from src.shared.domain.entities.chunk  import DocumentChunk
+
 
 class VectorRepository(VectorRepositoryInterface):
 

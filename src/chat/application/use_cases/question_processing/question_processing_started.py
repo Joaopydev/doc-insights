@@ -8,7 +8,7 @@ from src.chat.application.events.question_answered_event import QuestionAnswered
 from src.shared.application.ports.response_generator import ResponseGenerator
 from src.shared.application.ports.embedding_generator import EmbeddingGenerator
 from src.shared.application.ports.event_publisher import EventPublisher
-from src.processing.application.ports.vector_repository import VectorRepository
+from src.shared.application.ports.vector_repository import VectorRepository
 
 
 class QuestionProcessingUseCase:

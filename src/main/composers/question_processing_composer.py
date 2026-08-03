@@ -3,7 +3,7 @@ from typing import Awaitable
 from src.chat.application.use_cases.question_processing.question_processing_started import QuestionProcessingUseCase
 from src.chat.infrastructure.repositories.chat_repository import ChatRepository
 
-from src.processing.infrastructure.repositories.vector_repository import VectorRepository
+from src.shared.infrastructure.repositories.vector_repository import VectorRepository
 from src.shared.infrastructure.ai.embedding_generator import EmbeddingGenerator
 from src.shared.infrastructure.dynamodb.client import DynamoDBClient
 from src.shared.infrastructure.ai.client import OpenAIClient

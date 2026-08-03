@@ -19,14 +19,29 @@ class DynamoDBClient(DBClient):
         return response.get("Item")
 
     def query(self, table_name: str, index_name: str, key_name: str, key_value: str):
+        items = self.query_many(
+            table_name=table_name,
+            index_name=index_name,
+            key_name=key_name,
+            key_value=key_value,
+        )
+
+        return items[0] if items else None
+
+    def query_many(
+        self,
+        table_name: str,
+        index_name: str,
+        key_name: str,
+        key_value: str,
+    ):
         table = self._get_table(table_name)
         response = table.query(
             IndexName=index_name,
-            KeyConditionExpression=Key(key_name).eq(key_value)
+            KeyConditionExpression=Key(key_name).eq(key_value),
         )
-        items = response.get("Items", [])
 
-        return items[0] if items else None
+        return response.get("Items", [])
 
     def update_item(
         self,

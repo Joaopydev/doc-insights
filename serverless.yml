@@ -163,6 +163,16 @@ functions:
               - QuestionAsked
     timeout: 15
 
+  getMessages:
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.get_message.handler.handler
+    events:
+      - httpApi:
+          path: /messages/{conversation_id}
+          method: GET
+
 resources:
   Resources:
     TextractTopic:
