@@ -12,12 +12,15 @@ provider:
     CHAT_TABLE: !Ref ChatTable
     USER_TABLE: !Ref UserTable
     CONVERSATION_TABLE: !Ref ConversationTable
+    CONNECTIONS_TABLE: !Ref ConnectionsTable
     TEXTRACT_TOPIC_ARN: !Ref TextractTopic
     TEXTRACT_ROLE_ARN: !GetAtt TextractPublishRole.Arn
     JWT_PRIVATE_KEY: ${env:JWT_PRIVATE_KEY}
     JWT_PUBLIC_KEY: ${env:JWT_PUBLIC_KEY}
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
     NEON_DATABASE_URL: ${env:NEON_DATABASE_URL}
+    WEBSOCKET_ENDPOINT:
+      Fn::Sub: "https://${WebsocketsApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}"
 
   iam:
     role:
@@ -48,6 +51,9 @@ provider:
 
             - !GetAtt ConversationTable.Arn
             - !Sub "${ConversationTable.Arn}/index/*"
+
+            - !GetAtt ConnectionsTable.Arn
+            - !Sub "${ConnectionsTable.Arn}/index/*"
 
         - Effect: Allow
           Action:
@@ -172,6 +178,38 @@ functions:
       - httpApi:
           path: /messages/{conversation_id}
           method: GET
+
+  websocketConnect:
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.websocket_connect.handler.handler
+    events:
+      - websocket:
+          route: $connect
+
+  websocketDisconnect:
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.websocket_disconnect.handler.handler
+    events:
+      - websocket:
+          route: $disconnect
+
+  websocketPostToConnection:
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.websocket_post_to_connection.handler.handler
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - docinsight.chat
+            detail-type:
+              - QuestionAnswered
+    timeout: 15
 
 resources:
   Resources:
@@ -332,6 +370,27 @@ resources:
           - IndexName: document-id-index
             KeySchema:
               - AttributeName: document_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    ConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: connection-table
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: connection_id
+            AttributeType: S
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connection_id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: user-id-index
+            KeySchema:
+              - AttributeName: user_id
                 KeyType: HASH
             Projection:
               ProjectionType: ALL

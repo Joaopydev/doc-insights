@@ -12,6 +12,14 @@ class DBClient(ABC):
         pass
 
     @abstractmethod
+    def delete_item(
+        self,
+        table_name: str,
+        key: dict
+    ):
+        pass
+
+    @abstractmethod
     def get_item(
         self,
         table_name: str,

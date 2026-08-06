@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     user_table: str
     chat_table: str
     conversation_table: str
+    conncetions_table: str
 
     jwt_private_key: str
     jwt_public_key: str
@@ -15,6 +16,7 @@ class Settings(BaseSettings):
     textract_role_arn: str
 
     neon_database_url: str
+    websocket_endpoint: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

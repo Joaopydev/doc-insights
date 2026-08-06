@@ -16,13 +16,17 @@ class APIGatewayRequestAdapter:
 
         if auth_required:
             auth_middleware = AuthenticationMiddleware(JWTService())
-            user_id = auth_middleware.handle(event.get("headers", {}))
+            user_id = auth_middleware.handle(
+                headers=event.get("headers", {}),
+                query_params=event.get("queryStringParameters", {}),
+            )
 
         http_request = HTTPRequest(
             body=json.loads(event.get("body", "{}")),
             params=event.get("pathParameters", {}),
             query=event.get("queryStringParameters", {}),
-            user_id=user_id
+            user_id=user_id,
+            connection_id=event.get("requestContext", {}).get("connectionId")
         )
 
         return controller(http_request)

@@ -13,6 +13,10 @@ class DynamoDBClient(DBClient):
         table = self._get_table(table_name)
         table.put_item(Item=item)
 
+    def delete_item(self, table_name: str, key: dict):
+        table = self._get_table(table_name)
+        table.delete_item(Key=key)
+
     def get_item(self, table_name, key):
         table = self._get_table(table_name)
         response = table.get_item(Key=key)
