@@ -56,5 +56,5 @@ class ChatMessage:
             "conversation_id": self.conversation_id,
             "content": self.content,
             "message_type": self.message_type.value,
-            "created_at": self.created_at.isoformat(),
+            "created_at": self.created_at.isoformat() if isinstance(self.created_at, datetime) else self.created_at,
         }
