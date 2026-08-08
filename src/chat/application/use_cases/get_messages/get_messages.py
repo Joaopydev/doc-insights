@@ -15,7 +15,7 @@ class GetMessagesUseCase:
         input_dto: GetMessagesInput
     ) -> GetMessagesOutPut:
 
-        conversation = self.chat_repository.get_conversation_by_document_id(input_dto.conversation_id)
+        conversation = self.chat_repository.get_conversation_by_id(input_dto.conversation_id)
         if not conversation or conversation.user_id != input_dto.user_id:
             raise ConversationNotFound("Conversation not found.")
 
