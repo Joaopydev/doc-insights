@@ -14,7 +14,7 @@ class GetMessagesController(ControllerInterface):
     def handle(self, request: HTTPRequest) -> HTTPResponse:
         input_data = GetMessagesInput(
             user_id=request.user_id,
-            conversation_id=request.query_params["conversation_id"]
+            conversation_id=request.params["conversation_id"]
         )
 
         output = self.use_case.execute(input_data)
