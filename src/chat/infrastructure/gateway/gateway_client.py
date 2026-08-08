@@ -6,6 +6,7 @@ from src.chat.application.ports.gateway_client import (
 )
 from src.main.config.settings import settings
 
+
 class GatewayClient(GatewayClientInterface):
 
     def __init__(self) -> None:

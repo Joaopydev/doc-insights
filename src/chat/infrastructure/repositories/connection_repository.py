@@ -16,13 +16,13 @@ class ConnectionRepository(ConnectionRepositoryInterface):
 
     def create_connection(self, connection: Connection) -> None:
         self.db_client.save(
-            table_name=settings.conncetions_table,
+            table_name=settings.connections_table,
             item=connection.to_dict()
         )
 
     def delete_connection(self, connection_id: str) -> None:
         self.db_client.delete_item(
-            table_name=settings.conncetions_table,
+            table_name=settings.connections_table,
             key={
                 "connection_id": {"S": connection_id}
             }
@@ -30,7 +30,7 @@ class ConnectionRepository(ConnectionRepositoryInterface):
 
     def get_connection_by_user_id(self, user_id: str) -> Optional[Connection]:
         item = self.db_client.query(
-            table_name=settings.conncetions_table,
+            table_name=settings.connections_table,
             index_name="user-id-index",
             key_name="user_id",
             key_value=user_id,
