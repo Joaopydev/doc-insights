@@ -2,6 +2,7 @@ from typing import Awaitable
 
 from src.chat.application.use_cases.question_processing.question_processing_started import QuestionProcessingUseCase
 from src.chat.infrastructure.repositories.chat_repository import ChatRepository
+from src.chat.infrastructure.cache.redis_response_cache import RedisResponseCache
 
 from src.shared.infrastructure.repositories.vector_repository import VectorRepository
 from src.shared.infrastructure.ai.embedding_generator import EmbeddingGenerator
@@ -22,6 +23,7 @@ class QuestionProcessingComposer:
         embedding_generator = EmbeddingGenerator(ai_client)
         response_generator = ResponseGenerator(ai_client)
         event_publisher = EventBridgeClient()
+        response_cache = RedisResponseCache()
 
         use_case = QuestionProcessingUseCase(
             chat_repository=chat_repository,
@@ -29,6 +31,7 @@ class QuestionProcessingComposer:
             embedding_generator=embedding_generator,
             response_generator=response_generator,
             event_publisher=event_publisher,
+            response_cache=response_cache,
         )
 
         return use_case.execute

@@ -80,3 +80,5 @@ jobs:
           JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
           ECR_IMAGE_URI: ${{ secrets.ECR_IMAGE_URI }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}

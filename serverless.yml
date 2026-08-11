@@ -19,6 +19,8 @@ provider:
     JWT_PUBLIC_KEY: ${env:JWT_PUBLIC_KEY}
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
     NEON_DATABASE_URL: ${env:NEON_DATABASE_URL}
+    REDIS_HOST: ${env:REDIS_HOST}
+    REDIS_PORT: ${env:REDIS_PORT}
     WEBSOCKET_ENDPOINT:
       Fn::Sub: "https://${WebsocketsApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}"
 

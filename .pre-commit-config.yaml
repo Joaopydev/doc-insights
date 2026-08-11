@@ -13,6 +13,7 @@ repos:
           - langchain_text_splitters
           - openai
           - pgvector
+          - redis
         args:
           [
             "-rn",

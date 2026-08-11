@@ -4,6 +4,7 @@ from src.chat.application.services.context_builder import ContextBuilder
 from src.chat.domain.entities.chat_message import ChatMessage
 from src.chat.domain.value_objects.message_type import MessageType
 from src.chat.application.events.question_answered_event import QuestionAnsweredEvent
+from src.chat.application.ports.response_cache import ResponseCache
 
 from src.shared.application.ports.response_generator import ResponseGenerator
 from src.shared.application.ports.embedding_generator import EmbeddingGenerator
@@ -20,28 +21,47 @@ class QuestionProcessingUseCase:
         embedding_generator: EmbeddingGenerator,
         response_generator: ResponseGenerator,
         event_publisher: EventPublisher,
+        response_cache: ResponseCache,
     ):
         self.chat_repository = chat_repository
         self.vector_repository = vector_repository
         self.embedding_generator = embedding_generator
         self.response_generator = response_generator
         self.event_publisher = event_publisher
+        self.response_cache = response_cache
 
     async def execute(self, event: QuestionAskedEvent):
+
         message = self.chat_repository.get_message_by_id(event.message_id)
         if not message:
             return
 
-        message_embedding = await self.embedding_generator.generate_embedding([message.content])
-        chunks = self.vector_repository.semantic_similarity_search(
-            embedding=message_embedding[0],
+        cache_key = self.response_cache.create_cache_key(
             document_id=event.document_id,
-        )
-        context = ContextBuilder.build(chunks)
-        response = await self.response_generator.generate(
             question=message.content,
-            context=context,
         )
+        cached_response = self.response_cache.get(cache_key)
+
+        if cached_response:
+            response = cached_response
+            print("Cache hit: Using cached response.")
+        else:
+            message_embedding = await self.embedding_generator.generate_embedding([message.content])
+            chunks = self.vector_repository.semantic_similarity_search(
+                embedding=message_embedding[0],
+                document_id=event.document_id,
+            )
+            context = ContextBuilder.build(chunks)
+            response = await self.response_generator.generate(
+                question=message.content,
+                context=context,
+            )
+            self.response_cache.set(
+                key=cache_key,
+                value=response,
+                ttl=3600,
+            )
+
         ai_message = ChatMessage.create(
             conversation_id=message.conversation_id,
             content=response,
