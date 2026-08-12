@@ -47,6 +47,7 @@ class QuestionProcessingUseCase:
             response = cached_response
             print("Cache hit: Using cached response.")
         else:
+            print("Cache miss: Generating new response.")
             message_embedding = await self.embedding_generator.generate_embedding([message.content])
             chunks = self.vector_repository.semantic_similarity_search(
                 embedding=message_embedding[0],
@@ -75,3 +76,4 @@ class QuestionProcessingUseCase:
                 conversation_id=message.conversation_id
             )
         )
+        print("Question processing completed and response published.")
