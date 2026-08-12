@@ -16,6 +16,8 @@ class RedisResponseCache(ResponseCache):
             host=settings.redis_host,
             port=int(settings.redis_port),
             decode_responses=True,
+            socket_connect_timeout=5,
+            socket_timeout=5,
         )
 
     def get(self, key: str) -> Optional[str]:
