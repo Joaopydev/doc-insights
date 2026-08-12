@@ -169,7 +169,7 @@ functions:
               - docinsight.chat
             detail-type:
               - QuestionAsked
-    timeout: 15
+    timeout: 30
 
   getMessages:
     image:
