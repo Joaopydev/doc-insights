@@ -8,7 +8,6 @@ class ResponseCache(ABC):
     def get(self, key: str) -> Optional[str]:
         pass
 
-
     @abstractmethod
     def set(self, key: str, value: str, ttl: int) -> None:
         pass
