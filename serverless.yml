@@ -162,6 +162,11 @@ functions:
       uri: ${env:ECR_IMAGE_URI}
       command:
         - src.functions.question_processing.handler.handler
+    vpc:
+      subnetIds:
+        - ${env:SUBNET_ID}
+      securityGroupIds:
+        - ${env:LAMBDA_SECURITY_GROUP_ID}
     events:
       - eventBridge:
           pattern:
@@ -169,7 +174,7 @@ functions:
               - docinsight.chat
             detail-type:
               - QuestionAsked
-    timeout: 30
+    timeout: 15
 
   getMessages:
     image:
