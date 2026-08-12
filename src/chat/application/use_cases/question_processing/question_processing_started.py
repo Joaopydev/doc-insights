@@ -34,6 +34,7 @@ class QuestionProcessingUseCase:
 
         message = self.chat_repository.get_message_by_id(event.message_id)
         if not message:
+            print("Message not found")
             return
 
         cache_key = self.response_cache.create_cache_key(
