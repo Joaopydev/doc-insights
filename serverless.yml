@@ -165,6 +165,7 @@ functions:
     vpc:
       subnetIds:
         - ${env:SUBNET_ID}
+        - ${env:SUBNET2_ID}
       securityGroupIds:
         - ${env:LAMBDA_SECURITY_GROUP_ID}
     events:
