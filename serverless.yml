@@ -162,12 +162,6 @@ functions:
       uri: ${env:ECR_IMAGE_URI}
       command:
         - src.functions.question_processing.handler.handler
-    vpc:
-      subnetIds:
-        - ${env:SUBNET_ID}
-        - ${env:SUBNET2_ID}
-      securityGroupIds:
-        - ${env:LAMBDA_SECURITY_GROUP_ID}
     events:
       - eventBridge:
           pattern:

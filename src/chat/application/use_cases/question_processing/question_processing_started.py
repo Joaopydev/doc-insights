@@ -41,6 +41,7 @@ class QuestionProcessingUseCase:
             document_id=event.document_id,
             question=message.content,
         )
+
         cached_response = self.response_cache.get(cache_key)
 
         if cached_response:
