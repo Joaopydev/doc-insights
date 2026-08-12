@@ -23,7 +23,9 @@ class QuestionProcessingComposer:
         embedding_generator = EmbeddingGenerator(ai_client)
         response_generator = ResponseGenerator(ai_client)
         event_publisher = EventBridgeClient()
+        print("Before cache init")
         response_cache = RedisResponseCache()
+        print("After cache init")
 
         use_case = QuestionProcessingUseCase(
             chat_repository=chat_repository,
