@@ -19,4 +19,5 @@ async def async_handler(event: Dict[str, Any], context: Any):
         traceback.print_exc(e)
 
 def handler(event: Dict[str, Any], context: Any):
+    print("INIT HANDLER")
     asyncio.run(async_handler(event, context))
