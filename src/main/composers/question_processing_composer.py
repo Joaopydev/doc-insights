@@ -4,12 +4,9 @@ from src.chat.application.use_cases.question_processing.question_processing_star
 from src.chat.infrastructure.repositories.chat_repository import ChatRepository
 from src.chat.infrastructure.cache.redis_response_cache import RedisResponseCache
 
-from src.shared.infrastructure.repositories.vector_repository import VectorRepository
-from src.shared.infrastructure.ai.embedding_generator import EmbeddingGenerator
 from src.shared.infrastructure.dynamodb.client import DynamoDBClient
-from src.shared.infrastructure.ai.client import OpenAIClient
-from src.shared.infrastructure.ai.response_generator import ResponseGenerator
 from src.shared.infrastructure.eventbridge.client import EventBridgeClient
+from src.shared.infrastructure.sqs.sqs_publisher import SQSPublisher
 
 
 class QuestionProcessingComposer:
@@ -18,22 +15,15 @@ class QuestionProcessingComposer:
     def compose() -> Awaitable:
 
         chat_repository = ChatRepository(DynamoDBClient())
-        vector_repository = VectorRepository()
-        ai_client = OpenAIClient()
-        embedding_generator = EmbeddingGenerator(ai_client)
-        response_generator = ResponseGenerator(ai_client)
         event_publisher = EventBridgeClient()
-        print("Before cache init")
         response_cache = RedisResponseCache()
-        print("After cache init")
+        message_publisher = SQSPublisher()
 
         use_case = QuestionProcessingUseCase(
             chat_repository=chat_repository,
-            vector_repository=vector_repository,
-            embedding_generator=embedding_generator,
-            response_generator=response_generator,
             event_publisher=event_publisher,
             response_cache=response_cache,
+            message_publisher=message_publisher,
         )
 
         return use_case.execute

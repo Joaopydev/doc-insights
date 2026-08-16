@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     chat_table: str
     conversation_table: str
     connections_table: str
+    questions_queue: str
 
     jwt_private_key: str
     jwt_public_key: str

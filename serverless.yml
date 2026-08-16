@@ -21,6 +21,7 @@ provider:
     NEON_DATABASE_URL: ${env:NEON_DATABASE_URL}
     REDIS_HOST: ${env:REDIS_HOST}
     REDIS_PORT: ${env:REDIS_PORT}
+    QUESTIONS_QUEUE: !Ref QuestionsQueue
     WEBSOCKET_ENDPOINT:
       Fn::Sub: "https://${WebsocketsApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}"
 
@@ -171,6 +172,31 @@ functions:
               - QuestionAsked
     timeout: 15
 
+  updateCache:
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.update_cache.handler.handler
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - docinsight.chat
+            detail-type:
+              - UpdateCache
+    timeout: 15
+
+  processQuestion:
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.process_question.handler.handler
+    events:
+      - sqs:
+          arn: !GetAtt QuestionsQueue.Arn
+          batchSize: 1
+    timeout: 30
+
   getMessages:
     image:
       uri: ${env:ECR_IMAGE_URI}
@@ -264,6 +290,20 @@ resources:
         NotificationConfiguration:
           EventBridgeConfiguration:
             EventBridgeEnabled: true
+
+    QuestionsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: question-queue-service
+        VisibilityTimeout: 60
+        RedrivePolicy:
+          maxReceiveCount: 3
+          deadLetterTargetArn: !GetAtt MealsDLQ.Arn
+
+    QuestionsDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: questions-queue-dlq-service
 
     DocumentTable:
       Type: AWS::DynamoDB::Table
