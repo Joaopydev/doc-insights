@@ -70,6 +70,10 @@ provider:
           Resource:
             - arn:aws:events:us-east-1:553004107808:event-bus/default
 
+        - Effect: Allow
+          Action: sqs:SendMessage
+          Resource: !GetAtt QuestionsQueue.Arn
+
 functions:
   createDocument:
     image:
