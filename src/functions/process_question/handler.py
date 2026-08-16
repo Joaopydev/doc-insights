@@ -6,19 +6,22 @@ from src.main.composers.process_question_composer import ProcessQuestionComposer
 from src.chat.application.use_cases.question_processing.process_question_dto import ProcessQuestionInput
 
 
+def parse_record(record: Dict[str, Any]) -> ProcessQuestionInput:
+    body = json.loads(record["body"])
+
+    return ProcessQuestionInput(
+        message_id=body["message_id"],
+        document_id=body["document_id"],
+        cache_key=body["cache_key"],
+    )
+
 async def async_handler(event: Dict[str, Any], context: Any):
     compose = ProcessQuestionComposer.compose()
     tasks = [
-        compose(
-            ProcessQuestionInput(
-                message_id=json.dumps(record["body"]["message_id"]),
-                document_id=json.dumps(record["body"]["document_id"]),
-                cache_key=json.dumps(record["body"]["cache_key"]),
-            )
-        )
+        compose(parse_record(record))
         for record in event["Records"]
     ]
-    await asyncio.gather(**tasks)
+    await asyncio.gather(*tasks)
 
 def handler(event: Dict[str, Any], context: Any):
     asyncio.run(async_handler(event, context))
