@@ -298,7 +298,7 @@ resources:
         VisibilityTimeout: 60
         RedrivePolicy:
           maxReceiveCount: 3
-          deadLetterTargetArn: !GetAtt MealsDLQ.Arn
+          deadLetterTargetArn: !GetAtt QuestionsDLQ.Arn
 
     QuestionsDLQ:
       Type: AWS::SQS::Queue
