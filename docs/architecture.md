@@ -312,7 +312,50 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
 
 ---
 
-## 4. C4 Model
+## 4. AWS Infrastructure & Lambda Functions
+
+### Functions Summary
+
+| Function                    | Trigger                        | Purpose                              | VPC | Timeout |
+| --------------------------- | ------------------------------ | ------------------------------------ | --- | ------- |
+| `createDocument`            | HTTP POST /document            | Upload document metadata and payload | No  | 15s     |
+| `signin`                    | HTTP POST /signin              | User authentication                  | No  | 15s     |
+| `signup`                    | HTTP POST /signup              | User registration                    | No  | 15s     |
+| `startExtracting`           | EventBridge (S3 raw/\*)        | Submit document to AWS Textract      | No  | 15s     |
+| `indexDocument`             | EventBridge (S3 extracted/\*)  | Generate embeddings & index          | No  | 15s     |
+| `textractCompleted`         | SNS (Textract callback)        | Handle Textract completion           | No  | 15s     |
+| `askQuestion`               | HTTP POST /chat                | Create question & emit event         | No  | 15s     |
+| `questionProcessing`        | EventBridge (QuestionAsked)    | Retrieve context & update cache      | Yes | 15s     |
+| `processQuestion`           | SQS Queue                      | Call OpenAI LLM for answer           | Yes | 30s     |
+| `updateCache`               | EventBridge (UpdateCache)      | Invalidate Redis cache               | Yes | 15s     |
+| `getMessages`               | HTTP GET /messages/{id}        | Retrieve chat history                | No  | 15s     |
+| `websocketConnect`          | WebSocket $connect             | Register connection                  | No  | 15s     |
+| `websocketDisconnect`       | WebSocket $disconnect          | Unregister connection                | No  | 15s     |
+| `websocketPostToConnection` | EventBridge (QuestionAnswered) | Send answer to client                | No  | 15s     |
+
+### DynamoDB Tables
+
+| Table                | Attributes                                           | GSI               | Purpose                              |
+| -------------------- | ---------------------------------------------------- | ----------------- | ------------------------------------ |
+| `document-table`     | id (PK), s3_key, textract_job_id, extracted_text_key | 3 indexes         | Document metadata & processing state |
+| `user-table`         | id (PK), email                                       | email-index       | User identity & credentials          |
+| `chat-table`         | id (PK), conversation_id, document_id                | 2 indexes         | Chat messages                        |
+| `conversation-table` | id (PK), document_id                                 | document-id-index | Conversation sessions                |
+| `connection-table`   | connection_id (PK), user_id                          | user-id-index     | WebSocket connections                |
+
+### Storage & Messaging
+
+| Resource                           | Purpose                           | Config                                            |
+| ---------------------------------- | --------------------------------- | ------------------------------------------------- |
+| S3: `docinsight-raw-documents`     | Raw PDF storage & extracted text  | EventBridge notifications enabled                 |
+| SNS: `textract-document-completed` | Textract completion notifications | Lambda subscription to textractCompleted          |
+| SQS: `question-queue-service`      | Question processing queue         | Visibility: 60s, DLQ: questions-queue-dlq-service |
+| Redis                              | Cache for embeddings & context    | Requires VPC configuration                        |
+| PostgreSQL (Neon)                  | pgvector storage for embeddings   | Requires VPC configuration                        |
+
+---
+
+## 5. C4 Model
 
 ### Level 1 — Context Diagram
 
@@ -322,181 +365,329 @@ flowchart LR
   API[API Gateway]
   Identity[Identity Context]
   DocMgmt[Document Management Context]
-  Processing[Document Processing Context]
-  Intelligence[Document Intelligence Context]
-  KB[Knowledge Base Context]
+  Processing[Processing Context]
+  Chat[Chat Context]
   OpenAI[OpenAI]
+  Textract[AWS Textract]
   S3[S3]
   DynamoDB[DynamoDB]
   EventBridge[EventBridge]
+  SNS[SNS]
+  SQS[SQS]
+  Redis[Redis]
+  Neon[PostgreSQL/pgvector]
   CloudWatch[CloudWatch]
+  WebSocket[WebSocket]
 
-  User -->|Uploads document, queries analysis, asks questions| API
-  API -->|Authentication & authorization| Identity
-  API -->|Document upload request| DocMgmt
-  DocMgmt -->|Store raw document| S3
-  DocMgmt -->|Publish document.created/upload.completed| EventBridge
-  EventBridge -->|Triggers extraction| Processing
-  Processing -->|Read raw document| S3
-  Processing -->|Publish document.text.extracted| EventBridge
-  EventBridge -->|Triggers intelligence| Intelligence
-  Intelligence -->|Call AI| OpenAI
-  Intelligence -->|Store analysis results| DynamoDB
-  Intelligence -->|Publish analysis events| EventBridge
-  EventBridge -->|Triggers knowledge indexing| KB
-  KB -->|Call OpenAI embedding API| OpenAI
-  KB -->|Store retrieval artifacts| DynamoDB
-  API -->|Logs/metrics| CloudWatch
-  Processing -->|Logs/metrics| CloudWatch
-  Intelligence -->|Logs/metrics| CloudWatch
-  KB -->|Logs/metrics| CloudWatch
+  User -->|Auth: signin/signup| API
+  User -->|Upload document| API
+  User -->|Ask question| API
+  User -->|Real-time updates| WebSocket
+
+  API -->|Auth| Identity
+  API -->|Upload| DocMgmt
+  API -->|Chat| Chat
+
+  DocMgmt -->|Store raw PDF| S3
+  DocMgmt -->|Metadata| DynamoDB
+  S3 -->|EventBridge: Object Created| EventBridge
+
+  EventBridge -->|Start Textract| Processing
+  Processing -->|Extract text| Textract
+  Textract -->|SNS notification| SNS
+  SNS -->|Completion| Processing
+  Processing -->|Store extracted text| S3
+  Processing -->|EventBridge: Extracted| EventBridge
+
+  EventBridge -->|Index document| Processing
+  Processing -->|Embeddings| OpenAI
+  Processing -->|Store vectors| Neon
+  Processing -->|Cache| Redis
+
+  Chat -->|Send question| EventBridge
+  Chat -->|Queue| SQS
+  EventBridge -->|Process| Chat
+  Chat -->|LLM| OpenAI
+  Chat -->|Answer| WebSocket
+
+  Lambda -->|Logs| CloudWatch
 ```
 
 ### Level 2 — Container Diagram
 
 ```mermaid
 flowchart TB
-  subgraph AWS
-    APIGW[API Gateway]
+  subgraph AWS[AWS Cloud]
+    APIGW[API Gateway HTTP]
+    WSAPI[API Gateway WebSocket]
     EB[EventBridge]
-    S3[S3]
+    S3[S3: docinsight-raw-documents]
+    Textract[AWS Textract]
+    SNS[SNS: textract-document-completed]
+    SQS[SQS: question-queue-service]
     DDB[DynamoDB]
     CW[CloudWatch]
   end
 
-  subgraph Lambda
-    APIHandler[API Lambda]
-    UploadHandler[Upload Orchestration Lambda]
-    ExtractHandler[Text Extraction Lambda]
-    IntelligenceHandler[Intelligence Lambda]
-    KnowledgeHandler[Knowledge Indexing Lambda]
+  subgraph External
+    OpenAI[OpenAI API]
+    Neon[PostgreSQL/pgvector]
+    Redis[Redis Cache]
   end
 
-  User[User] -->|HTTP upload/query| APIGW
-  APIGW -->|invoke| APIHandler
-  APIHandler -->|write metadata| DDB
-  APIHandler -->|store file| S3
-  APIHandler -->|emit event| EB
+  subgraph Lambda[Lambda Functions - ECR Image]
+    CreateDoc[createDocument]
+    SignInUp[signin/signup]
+    StartExt[startExtracting]
+    TextractCB[textractCompleted]
+    IndexDoc[indexDocument]
+    AskQ[askQuestion]
+    QProc[questionProcessing]
+    ProcQ[processQuestion]
+    UpdateCache[updateCache]
+    GetMsg[getMessages]
+    WSConnect[websocketConnect]
+    WSDisconnect[websocketDisconnect]
+    WSPost[websocketPostToConnection]
+  end
 
-  EB -->|document.upload.completed| ExtractHandler
-  ExtractHandler -->|read raw PDF| S3
-  ExtractHandler -->|write extracted text| S3
-  ExtractHandler -->|emit event| EB
+  User -->|POST /document| APIGW
+  APIGW -->|invoke| CreateDoc
+  CreateDoc -->|Store metadata| DDB
+  CreateDoc -->|Upload PDF| S3
+  S3 -->|EventBridge trigger| EB
 
-  EB -->|document.text.extracted| IntelligenceHandler
-  IntelligenceHandler -->|call OpenAI| OpenAI
-  IntelligenceHandler -->|write analysis| DDB
-  IntelligenceHandler -->|emit events| EB
+  User -->|POST /signin, /signup| APIGW
+  APIGW -->|invoke| SignInUp
+  SignInUp -->|Persist user| DDB
 
-  EB -->|document.analysis.completed| KnowledgeHandler
-  KnowledgeHandler -->|read analysis/text| S3
-  KnowledgeHandler -->|call OpenAI embeddings| OpenAI
-  KnowledgeHandler -->|write knowledge records| DDB
+  EB -->|S3 Event: raw/*| StartExt
+  StartExt -->|Call Textract| Textract
+  StartExt -->|Store job_id| DDB
 
-  Lambda -->|all functions log| CW
+  Textract -->|Complete| SNS
+  SNS -->|Invoke| TextractCB
+  TextractCB -->|Get results| Textract
+  TextractCB -->|Store text in S3| S3
+  TextractCB -->|Update status| DDB
+
+  S3 -->|EventBridge trigger| EB
+  EB -->|S3 Event: extracted/*| IndexDoc
+  IndexDoc -->|Call embeddings| OpenAI
+  IndexDoc -->|Store vectors| Neon
+  IndexDoc -->|Set cache| Redis
+  IndexDoc -->|Update status| DDB
+
+  User -->|POST /chat| APIGW
+  APIGW -->|invoke| AskQ
+  AskQ -->|Create message| DDB
+  AskQ -->|Emit event| EB
+  AskQ -->|Send to queue| SQS
+
+  EB -->|QuestionAsked| QProc
+  QProc -->|Get context| Redis
+  QProc -->|Get conversation| DDB
+  QProc -->|Emit UpdateCache| EB
+
+  EB -->|UpdateCache| UpdateCache
+  UpdateCache -->|Invalidate| Redis
+
+  SQS -->|Poll| ProcQ
+  ProcQ -->|Call OpenAI| OpenAI
+  ProcQ -->|Store answer| DDB
+  ProcQ -->|Emit event| EB
+
+  EB -->|QuestionAnswered| WSPost
+  WSPost -->|Retrieve answer| DDB
+  WSPost -->|Send to client| WSAPI
+
+  User -->|WebSocket| WSAPI
+  WSAPI -->|$connect| WSConnect
+  WSAPI -->|$disconnect| WSDisconnect
+  WSConnect -->|Store connection| DDB
+  WSDisconnect -->|Remove connection| DDB
+
+  User -->|GET /messages/{id}| APIGW
+  APIGW -->|invoke| GetMsg
+  GetMsg -->|Query chat| DDB
+  GetMsg -->|Return messages| APIGW
+
+  Lambda -->|All functions| CW
 ```
 
-### Communication flow
+### Communication Flow
 
-- User interacts with API Gateway, which invokes Lambda functions.
-- Document upload and metadata are stored in S3 and DynamoDB.
-- EventBridge routes domain events across processing lambdas.
-- Extracted text and analysis results are persisted.
-- OpenAI is called for summarization, entity extraction, risk assessment, and embeddings.
-- CloudWatch collects logs and metrics from all Lambda functions.
+**Document Processing Pipeline:**
 
----
+1. User uploads PDF → `createDocument` stores in S3 and DynamoDB
+2. S3 EventBridge trigger → `startExtracting` submits to Textract
+3. Textract completes → SNS → `textractCompleted` retrieves text
+4. Extracted text saved to S3 → EventBridge trigger → `indexDocument`
+5. `indexDocument` generates embeddings via OpenAI, stores in pgvector, caches in Redis
 
-## 5. Event Storming
+**Question-Answering Pipeline:**
 
-### document.created
+1. User asks question → `askQuestion` creates message record, publishes event, sends to SQS
+2. EventBridge `QuestionAsked` → `questionProcessing` retrieves context and caching strategy
+3. SQS → `processQuestion` calls OpenAI LLM with retrieval context
+4. Answer generated → EventBridge `QuestionAnswered` → `websocketPostToConnection`
+5. WebSocket sends real-time answer to connected client
 
-- Description: A new document record has been created and registered.
-- Producer: Document Management
-- Consumers: Document Processing, Knowledge Base
-- Trigger: User upload request accepted.
-- Business Meaning: A document exists and processing may begin.
+**WebSocket Flow:**
 
-### document.upload.completed
-
-- Description: Raw document file upload to S3 is complete.
-- Producer: Document Management
-- Consumers: Document Processing
-- Trigger: S3 upload success and metadata persisted.
-- Business Meaning: Document payload is ready for extraction.
-
-### document.text.extracted
-
-- Description: Document text has been extracted from the PDF.
-- Producer: Document Processing
-- Consumers: Document Intelligence, Knowledge Base
-- Trigger: OCR or text extraction completes.
-- Business Meaning: Document is ready for intelligence analysis.
-
-### document.summary.generated
-
-- Description: Plain-language summary for the document has been created.
-- Producer: Document Intelligence
-- Consumers: Knowledge Base, downstream analytics
-- Trigger: AI summary generation completes.
-- Business Meaning: Document understanding is available.
-
-### document.entities.extracted
-
-- Description: Structured entities have been extracted from the document.
-- Producer: Document Intelligence
-- Consumers: Knowledge Base, reporting, search indexing
-- Trigger: AI entity extraction completes.
-- Business Meaning: Document entities can be used for analysis and search.
-
-### document.risk.assessed
-
-- Description: Risk analysis and alert flags have been computed.
-- Producer: Document Intelligence
-- Consumers: Monitoring, alerting, compliance workflows
-- Trigger: Risk assessment completes.
-- Business Meaning: Document risk exposure is surfaced.
-
-### document.analysis.completed
-
-- Description: Document intelligence processing is complete.
-- Producer: Document Intelligence
-- Consumers: Knowledge Base, Document Management
-- Trigger: Combined analysis tasks complete.
-- Business Meaning: Document is fully analyzed and ready for retrieval.
-
-### document.knowledge.indexed
-
-- Description: Knowledge base artifacts and embeddings are ready.
-- Producer: Knowledge Base
-- Consumers: Question-answering workflows, search API
-- Trigger: Embedding generation and indexing complete.
-- Business Meaning: Document content is ready for RAG and retrieval.
-
-### question.asked
-
-- Description: A user asked a question against a document or knowledge base.
-- Producer: API Lambda / Question Service
-- Consumers: Answering workflow, audit trail
-- Trigger: Query request arrives.
-- Business Meaning: User expects a response backed by document data.
-
-### answer.generated
-
-- Description: A response for the user question has been generated.
-- Producer: Question-answering workflow
-- Consumers: API Lambda, audit, analytics
-- Trigger: Retrieval and answer synthesis completes.
-- Business Meaning: The system delivered an answer from document intelligence.
+- Client connects → `websocketConnect` stores connection_id & user_id
+- Events published → EventBridge routes to `websocketPostToConnection`
+- `websocketPostToConnection` looks up connections and sends via WebSocket API
+- Client disconnects → `websocketDisconnect` removes connection record
 
 ---
 
-## 6. EventBridge Contracts
+## 6. Event Catalog
 
-### document.created
+### Document Processing Events
 
-- Source: `docinsight.document-management`
-- DetailType: `document.created`
+#### QuestionAsked (docinsight.chat source)
+
+**Emitted by:** `askQuestion`
+**Consumed by:** `questionProcessing`, SQS queue
+**EventBridge Pattern:**
+
+```yaml
+source: [docinsight.chat]
+detail-type: [QuestionAsked]
+```
+
+**Payload:**
+
+```json
+{
+  "question_id": "q-123",
+  "conversation_id": "conv-456",
+  "document_id": "doc-789",
+  "user_id": "user-abc",
+  "question": "What are the key terms?",
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+#### UpdateCache (docinsight.chat source)
+
+**Emitted by:** `questionProcessing`
+**Consumed by:** `updateCache`
+**EventBridge Pattern:**
+
+```yaml
+source: [docinsight.chat]
+detail-type: [UpdateCache]
+```
+
+**Purpose:** Signals cache invalidation for conversation context
+
+#### QuestionAnswered (docinsight.chat source)
+
+**Emitted by:** `processQuestion`
+**Consumed by:** `websocketPostToConnection`
+**EventBridge Pattern:**
+
+```yaml
+source: [docinsight.chat]
+detail-type: [QuestionAnswered]
+```
+
+**Payload:**
+
+```json
+{
+  "question_id": "q-123",
+  "conversation_id": "conv-456",
+  "answer": "The key terms are...",
+  "sources": ["page_1", "page_3"],
+  "timestamp": "2024-01-15T10:35:00Z"
+}
+```
+
+### S3 Events (EventBridge routing)
+
+#### Object Created: raw/\* (Document Upload)
+
+**Trigger:** EventBridge S3 notification
+**Consumed by:** `startExtracting`
+**EventBridge Pattern:**
+
+```yaml
+source: [aws.s3]
+detail-type: [Object Created]
+detail:
+  bucket:
+    name: [docinsight-raw-documents]
+  object:
+    key:
+      - wildcard: "*/raw/*"
+```
+
+**Flow:** Document uploaded → Textract submission initiated
+
+#### Object Created: extracted/\* (Text Extraction Complete)
+
+**Trigger:** EventBridge S3 notification
+**Consumed by:** `indexDocument`
+**EventBridge Pattern:**
+
+```yaml
+source: [aws.s3]
+detail-type: [Object Created]
+detail:
+  bucket:
+    name: [docinsight-raw-documents]
+  object:
+    key:
+      - wildcard: "*/extracted/*"
+```
+
+**Flow:** Extracted text saved → Embedding generation & indexing initiated
+
+---
+
+## 7. EventBridge Rules & Integration
+
+### S3 → EventBridge Notifications
+
+S3 bucket `docinsight-raw-documents` is configured with:
+
+```
+EventBridgeConfiguration:
+  EventBridgeEnabled: true
+```
+
+This automatically routes all S3 events to the default EventBridge bus, triggering:
+
+- `startExtracting` on object creation in `*/raw/*` prefix
+- `indexDocument` on object creation in `*/extracted/*` prefix
+
+### SNS → Lambda Integration
+
+Textract completion notifications flow through:
+
+- AWS Textract → SNS Topic `textract-document-completed`
+- SNS → Lambda `textractCompleted` (via Lambda subscription)
+- Role: `textract-publish-role` allows Textract to publish to SNS
+
+### SQS → Lambda Integration
+
+Question processing uses FIFO semantics:
+
+- `askQuestion` publishes message to SQS `question-queue-service`
+- `processQuestion` polls queue with batch size 1
+- Dead-letter queue: `questions-queue-dlq-service` (max receive count: 3)
+- Visibility timeout: 60 seconds
+
+### WebSocket → EventBridge Integration
+
+Answer delivery to connected clients:
+
+- EventBridge `QuestionAnswered` event → `websocketPostToConnection`
+- Lambda function queries `connection-table` DynamoDB index
+- Sends answer via WebSocket API Management connection
 
 Schema:
 
@@ -1145,14 +1336,33 @@ serverless.yml
 
 The architecture decision records for DocInsight are stored separately under `docs/adr/`.
 
-- [ADR 001 — AWS Lambda](adr/001-aws-lambda.md)
-- [ADR 002 — EventBridge](adr/002-eventbridge.md)
-- [ADR 003 — DynamoDB](adr/003-dynamodb.md)
-- [ADR 004 — S3](adr/004-s3.md)
-- [ADR 005 — OpenAI](adr/005-openai.md)
-- [ADR 006 — Serverless Framework](adr/006-serverless-framework.md)
-- [ADR 007 — Docker](adr/007-docker.md)
-- [ADR 008 — LocalStack](adr/008-localstack.md)
-- [ADR 009 — Clean Architecture](adr/009-clean-architecture.md)
-- [ADR 010 — Event-Driven Architecture](adr/010-event-driven-architecture.md)
+### Core Infrastructure & Platform
+- [ADR 001 — AWS Lambda](adr/001-aws-lambda.md) — Serverless compute runtime
+- [ADR 006 — Serverless Framework](adr/006-serverless-framework.md) — Infrastructure as Code
+- [ADR 007 — Docker](adr/007-docker.md) — Container images for Lambda
+- [ADR 008 — LocalStack](adr/008-localstack.md) — Local AWS emulation
+
+### Storage & Data
+- [ADR 003 — DynamoDB](adr/003-dynamodb.md) — Document metadata and state
+- [ADR 004 — S3](adr/004-s3.md) — Raw document and artifact storage
+- [ADR 014 — PostgreSQL with pgvector](adr/014-postgresql-pgvector.md) — Vector embeddings storage
+
+### API & Real-time Communication
+- [ADR 013 — API Gateway](adr/013-api-gateway.md) — HTTP and WebSocket APIs
+- [ADR 016 — JWT Authentication](adr/016-jwt-authentication.md) — Stateless token-based auth
+
+### Event-Driven Orchestration & Messaging
+- [ADR 002 — EventBridge](adr/002-eventbridge.md) — Event routing and orchestration
+- [ADR 012 — SNS & SQS](adr/012-sns-sqs.md) — Asynchronous messaging (Textract notifications, question queue)
+
+### AI & Document Processing
+- [ADR 005 — OpenAI](adr/005-openai.md) — LLM and embeddings
+- [ADR 011 — AWS Textract](adr/011-aws-textract.md) — Document text extraction
+
+### Performance & Caching
+- [ADR 015 — Redis](adr/015-redis-caching.md) — In-memory caching layer
+
+### Architecture & Design Patterns
+- [ADR 009 — Clean Architecture](adr/009-clean-architecture.md) — Layered separation of concerns
+- [ADR 010 — Event-Driven Architecture](adr/010-event-driven-architecture.md) — Asynchronous event-driven design
 ```

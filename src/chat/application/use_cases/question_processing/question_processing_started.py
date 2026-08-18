@@ -25,13 +25,10 @@ class QuestionProcessingUseCase:
 
     async def execute(self, event: QuestionAskedEvent):
 
-        print("Before Dynamodb Connected")
         message = self.chat_repository.get_message_by_id(event.message_id)
         if not message:
             return
-        print("After Dynamodb Connected")
 
-        print("Befero Redis")
         cache_key = self.response_cache.create_cache_key(
             document_id=event.document_id,
             question=message.content,
