@@ -325,8 +325,8 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
 | `indexDocument`             | EventBridge (S3 extracted/\*)  | Generate embeddings & index          | No  | 15s     |
 | `textractCompleted`         | SNS (Textract callback)        | Handle Textract completion           | No  | 15s     |
 | `askQuestion`               | HTTP POST /chat                | Create question & emit event         | No  | 15s     |
-| `questionProcessing`        | EventBridge (QuestionAsked)    | Retrieve context & update cache      | Yes | 15s     |
-| `processQuestion`           | SQS Queue                      | Call OpenAI LLM for answer           | Yes | 30s     |
+| `questionProcessing`        | EventBridge (QuestionAsked)    | Check cache & route question         | Yes | 15s     |
+| `processQuestion`           | SQS Queue                      | LLM processing (cache miss only)     | Yes | 30s     |
 | `updateCache`               | EventBridge (UpdateCache)      | Invalidate Redis cache               | Yes | 15s     |
 | `getMessages`               | HTTP GET /messages/{id}        | Retrieve chat history                | No  | 15s     |
 | `websocketConnect`          | WebSocket $connect             | Register connection                  | No  | 15s     |
@@ -527,9 +527,11 @@ flowchart TB
 
 **Question-Answering Pipeline:**
 
-1. User asks question → `askQuestion` creates message record, publishes event, sends to SQS
-2. EventBridge `QuestionAsked` → `questionProcessing` retrieves context and caching strategy
-3. SQS → `processQuestion` calls OpenAI LLM with retrieval context
+1. User asks question → `askQuestion` creates message record, publishes QuestionAsked event
+2. EventBridge `QuestionAsked` → `questionProcessing` checks Redis for cached embeddings
+   - **Cache hit**: Semantic search + LLM call → Answer sent via WebSocket (fast path ~1-2s)
+   - **Cache miss**: Publish to SQS queue for deferred processing
+3. SQS `processQuestion` (only if cache miss) retrieves embeddings from pgvector, calls OpenAI LLM
 4. Answer generated → EventBridge `QuestionAnswered` → `websocketPostToConnection`
 5. WebSocket sends real-time answer to connected client
 
@@ -549,7 +551,7 @@ flowchart TB
 #### QuestionAsked (docinsight.chat source)
 
 **Emitted by:** `askQuestion`
-**Consumed by:** `questionProcessing`, SQS queue
+**Consumed by:** `questionProcessing` (decides cache routing)
 **EventBridge Pattern:**
 
 ```yaml
@@ -570,6 +572,8 @@ detail-type: [QuestionAsked]
 }
 ```
 
+**Routing:** `questionProcessing` checks Redis cache; if miss → publishes to SQS for `processQuestion`
+
 #### UpdateCache (docinsight.chat source)
 
 **Emitted by:** `questionProcessing`
@@ -585,7 +589,7 @@ detail-type: [UpdateCache]
 
 #### QuestionAnswered (docinsight.chat source)
 
-**Emitted by:** `processQuestion`
+**Emitted by:** `processQuestion` (cache miss path) OR `questionProcessing` (cache hit path)
 **Consumed by:** `websocketPostToConnection`
 **EventBridge Pattern:**
 

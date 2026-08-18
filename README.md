@@ -216,23 +216,34 @@ Connect via WebSocket to receive real-time updates on:
 1. User asks question → askQuestion (HTTP)
    ├─ Create conversation/message record
    ├─ Publish: QuestionAsked event
-   └─ Send SQS message to queue
+   └─ Return HTTP 202 (Accepted)
 
-2. EventBridge processes question → questionProcessing
-   ├─ Retrieve conversation context
-   ├─ Query cached embeddings
-   └─ Publish: UpdateCache event
+2. EventBridge routes → questionProcessing
+   ├─ Check Redis cache for embeddings
+   │
+   ├─ CACHE HIT (embeddings exist):
+   │  ├─ Generate question embedding
+   │  ├─ Semantic search + LLM call
+   │  ├─ Store answer in DynamoDB
+   │  └─ Publish: QuestionAnswered event ✓ FAST PATH (~1-2s)
+   │
+   └─ CACHE MISS (embeddings not cached):
+      ├─ Publish message to SQS queue
+      └─ Continues to Step 3...
 
-3. SQS processes question → processQuestion
-   ├─ Call OpenAI LLM with context
-   ├─ Generate answer with embeddings
+3. SQS processes (cache miss only) → processQuestion
+   ├─ Retrieve embeddings from pgvector
+   ├─ Generate question embedding
+   ├─ Semantic search + LLM call
    ├─ Store answer in DynamoDB
-   └─ Publish: QuestionAnswered event
+   └─ Publish: QuestionAnswered event (SLOW PATH ~5-15s)
 
 4. Answer ready → websocketPostToConnection
    ├─ Send answer to connected WebSocket clients
    └─ Notify user via real-time WebSocket
 ```
+
+**Key Insight**: `questionProcessing` decides whether to use fast path (cache hit) or queue for deferred processing (cache miss). `processQuestion` only runs when cache miss occurs.
 
 ## Configuration Files
 

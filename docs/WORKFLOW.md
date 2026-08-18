@@ -272,9 +272,7 @@ Timeline: ~5-15 seconds from question to answer delivery
      }
    }
    ```
-8. Send message to SQS queue `question-queue-service`:
-   - Message body includes conversation_id, question_id, document_id
-9. Return HTTP 202 (Accepted) with message_id
+8. Return HTTP 202 (Accepted) with message_id
 
 **Response:**
 
@@ -286,7 +284,7 @@ Timeline: ~5-15 seconds from question to answer delivery
 }
 ```
 
-### Step 2: EventBridge Routes Question (questionProcessing)
+### Step 2: Check Cache & Route Question (questionProcessing)
 
 **Trigger:** EventBridge `QuestionAsked` event
 
@@ -313,22 +311,25 @@ Timeline: ~5-15 seconds from question to answer delivery
 
 **Operations:**
 
-1. Extract question_id, conversation_id, document_id from event
+1. Extract question_id, conversation_id, document_id, question_text from event
 2. Query DynamoDB `document-table` for document metadata
 3. Try to retrieve cached embeddings from Redis:
    - Key: `doc:{document_id}:embeddings`
-   - If cache hit: use cached embeddings
-   - If cache miss: log and continue (embeddings will be retrieved in processQuestion)
-4. Query DynamoDB `conversation-table` for conversation context
-5. Retrieve recent messages from `chat-table` (last 5 messages)
-6. Prepare context for LLM:
-   ```
-   Recent messages:
-   - User: "Previous question?"
-   - Assistant: "Previous answer"
-   - ...
-   ```
-7. Emit EventBridge event `UpdateCache`:
+   - **If cache hit (embeddings exist):**
+     - Generate question embedding using OpenAI (text-embedding-3-small)
+     - Perform semantic search against cached embeddings
+     - Retrieve top-K relevant chunks from pgvector
+     - Call OpenAI LLM directly with chunks + conversation context
+     - Store answer in DynamoDB `chat-table`
+     - Emit `QuestionAnswered` event for WebSocket delivery
+     - **Execution ends here — SQS queue is NOT used**
+   - **If cache miss (embeddings not in Redis):**
+     - Publish message to SQS queue `question-queue-service` for deferred processing
+     - Message includes: question_id, conversation_id, document_id, question_text
+     - Continue to Step 3 (SQS processing)
+4. Query DynamoDB `conversation-table` for conversation context (used for both cache hit and miss)
+5. Retrieve recent messages from `chat-table` (last 5 messages) for LLM context
+6. Emit EventBridge event `UpdateCache`:
    ```json
    {
      "source": "docinsight.chat",
@@ -342,8 +343,8 @@ Timeline: ~5-15 seconds from question to answer delivery
 
 **Error Handling:**
 
-- If cache retrieval fails, continue (non-blocking)
-- If DynamoDB queries fail, return error event
+- If cache retrieval fails: Publish to SQS queue as fallback
+- If DynamoDB queries fail: Publish to SQS queue for retry
 
 ### Step 3: Cache Update Handler (updateCache)
 
@@ -371,7 +372,9 @@ Timeline: ~5-15 seconds from question to answer delivery
 
 **Purpose:** Ensures cache consistency when conversation state changes
 
-### Step 4: SQS → Process Question (processQuestion)
+**Note:** This runs in parallel with `questionProcessing` (EventBridge has no ordering guarantees)
+
+### Step 4: SQS → Process Question (processQuestion) — Cache Miss Path Only
 
 **Trigger:** SQS message from `question-queue-service`
 

@@ -202,21 +202,31 @@ docker logs localstack_main
 1. POST /chat (HTTP) → askQuestion
    └─ Create message in DynamoDB
    └─ Emit QuestionAsked event
-   └─ Send to SQS queue
 
 2. EventBridge QuestionAsked → questionProcessing
-   └─ Get cached embeddings (Redis)
-   └─ Prepare conversation context
-   └─ Emit UpdateCache event
+   ├─ Check Redis cache for embeddings
+   │
+   ├─ CACHE HIT:
+   │  ├─ Semantic search + LLM
+   │  ├─ Store answer (fast path)
+   │  └─ Emit QuestionAnswered → Skip to Step 5
+   │
+   └─ CACHE MISS:
+      ├─ Publish to SQS queue
+      └─ Continue to Step 3...
 
 3. EventBridge UpdateCache → updateCache
-   └─ Invalidate Redis cache
+   └─ Invalidate conversation cache
 
-4. SQS message → processQuestion
-   └─ Retrieve top-K relevant chunks
-   └─ Call OpenAI LLM
-   └─ Store answer in DynamoDB
+4. SQS message → processQuestion (cache miss only)
+   ├─ Retrieve embeddings from pgvector
+   ├─ Semantic search + LLM
+   ├─ Store answer in DynamoDB
    └─ Emit QuestionAnswered event
+
+5. EventBridge QuestionAnswered → websocketPostToConnection
+   └─ Send answer via WebSocket to client
+```
 
 5. EventBridge QuestionAnswered → websocketPostToConnection
    └─ Send answer via WebSocket to client
@@ -226,7 +236,8 @@ docker logs localstack_main
 
 7. WebSocket $disconnect → websocketDisconnect
    └─ Remove connection from DynamoDB
-```
+
+````
 
 ## DynamoDB Table Quick Reference
 
@@ -271,8 +282,8 @@ docker logs localstack_main
 | `textractCompleted`         | SNS              | 15s     | No  | Get extracted text  |
 | `indexDocument`             | EventBridge (S3) | 15s     | No  | Generate embeddings |
 | `askQuestion`               | HTTP POST        | 15s     | No  | Create question     |
-| `questionProcessing`        | EventBridge      | 15s     | Yes | Prepare context     |
-| `processQuestion`           | SQS              | 30s     | Yes | Call OpenAI LLM     |
+| `questionProcessing`        | EventBridge      | 15s     | Yes | Check cache + route |
+| `processQuestion`           | SQS              | 30s     | Yes | LLM (cache miss only) |
 | `updateCache`               | EventBridge      | 15s     | Yes | Invalidate cache    |
 | `getMessages`               | HTTP GET         | 15s     | No  | Fetch history       |
 | `websocketConnect`          | WebSocket        | 15s     | No  | Store connection    |
@@ -350,7 +361,7 @@ serverless list functions --stage dev
 
 # List deployed services
 aws cloudformation list-stacks --query 'StackSummaries[?contains(StackName, `document-analyzer`)]'
-```
+````
 
 ## Technology Reference
 
