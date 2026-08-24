@@ -357,6 +357,10 @@ Enterprises struggle to derive fast, reliable understanding from large volumes o
 
 ## 5. C4 Model
 
+### Current Project Flow
+
+![Current project flow](images/project-worflow.png)
+
 ### Level 1 — Context Diagram
 
 ```mermaid
