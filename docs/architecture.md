@@ -511,7 +511,7 @@ flowchart TB
   WSConnect -->|Store connection| DDB
   WSDisconnect -->|Remove connection| DDB
 
-  User -->|GET /messages/{id}| APIGW
+  User -->|"GET /messages/{id}"| APIGW
   APIGW -->|invoke| GetMsg
   GetMsg -->|Query chat| DDB
   GetMsg -->|Return messages| APIGW
