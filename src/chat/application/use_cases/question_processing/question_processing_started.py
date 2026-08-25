@@ -34,10 +34,8 @@ class QuestionProcessingUseCase:
             question=message.content,
         )
         cached_response = self.response_cache.get(cache_key)
-        print("After Redis")
 
         if not cached_response:
-            print("Before SQS")
             self.message_publisher.send_message(
                 {
                     "message_id": message.id,
@@ -45,7 +43,6 @@ class QuestionProcessingUseCase:
                     "cache_key": cache_key,
                 }
             )
-            print("After SQS")
             return
 
         ai_message = ChatMessage.create(

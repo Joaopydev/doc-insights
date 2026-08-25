@@ -7,6 +7,7 @@ import redis
 
 from src.chat.application.ports.response_cache import ResponseCache
 from src.main.config.settings import settings
+from src.main.config.logger import logger
 
 
 class RedisResponseCache(ResponseCache):
@@ -21,14 +22,21 @@ class RedisResponseCache(ResponseCache):
         )
 
     def get(self, key: str) -> Optional[str]:
-        return self.redis_client.get(key)
+        try:
+            return self.redis_client.get(key)
+        except redis.RedisError:
+            logger.exception("Redis Unavailable")
+            return None
 
     def set(self, key: str, value: str, ttl: int) -> None:
-        self.redis_client.set(
-            name=key,
-            value=value,
-            ex=ttl,
-        )
+        try:
+            self.redis_client.set(
+                name=key,
+                value=value,
+                ex=ttl,
+            )
+        except redis.RedisError:
+            logger.exception("Redis Unavailable")
 
     def create_cache_key(
         self,

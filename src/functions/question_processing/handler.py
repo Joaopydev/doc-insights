@@ -4,6 +4,7 @@ import traceback
 
 from src.chat.application.events.question_asked_event import QuestionAskedEvent
 from src.main.composers.question_processing_composer import QuestionProcessingComposer
+from src.main.config.logger import logger
 
 
 async def async_handler(event: Dict[str, Any], context: Any):
@@ -18,5 +19,6 @@ async def async_handler(event: Dict[str, Any], context: Any):
     except Exception as e:
         traceback.print_exc(e)
 
+@logger.inject_lambda_context
 def handler(event: Dict[str, Any], context: Any):
     asyncio.run(async_handler(event, context))

@@ -3,6 +3,7 @@ from openai import AsyncOpenAI
 
 from src.shared.application.ports.ai_client import AIClient
 from src.shared.application.prompts.question_answer_prompt import QuestionAnswerPrompt
+from src.main.config.logger import logger
 
 
 class OpenAIClient(AIClient):
@@ -22,17 +23,26 @@ class OpenAIClient(AIClient):
         question: str,
         context: str,
     ):
-        reponse = await self.client.chat.completions.create(
-            model="gpt-4.1-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": QuestionAnswerPrompt.build(context),
-                },
-                {
-                    "role": "user",
-                    "content": question
-                }
-            ]
-        )
-        return reponse.choices[0].message.content
+        try:
+            logger.info("Generating AI response")
+
+            response = await self.client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": QuestionAnswerPrompt.build(context),
+                    },
+                    {
+                        "role": "user",
+                        "content": question
+                    }
+                ]
+            )
+
+            logger.info("AI response generated successfully")
+
+            return response.choices[0].message.content
+        except Exception:
+            logger.exception("Failed to generate AI response")
+            raise

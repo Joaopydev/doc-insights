@@ -2,6 +2,7 @@ import json
 import asyncio
 from typing import Dict, Any
 
+from src.main.config.logger import logger
 from src.main.composers.process_question_composer import ProcessQuestionComposer
 from src.chat.application.use_cases.question_processing.process_question_dto import ProcessQuestionInput
 
@@ -23,5 +24,6 @@ async def async_handler(event: Dict[str, Any], context: Any):
     ]
     await asyncio.gather(*tasks)
 
+@logger.inject_lambda_context
 def handler(event: Dict[str, Any], context: Any):
     asyncio.run(async_handler(event, context))

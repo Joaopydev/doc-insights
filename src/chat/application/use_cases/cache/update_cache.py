@@ -1,5 +1,5 @@
 from src.chat.application.ports.response_cache import ResponseCache
-from src.chat.application.use_cases.cache.update_cache_dto import UpdateCacheInput
+from src.chat.application.events.update_cache_event import UpdateCacheEvent
 
 
 class UpdateCacheUseCase:
@@ -12,11 +12,11 @@ class UpdateCacheUseCase:
 
     def execute(
         self,
-        input_dto: UpdateCacheInput,
+        event: UpdateCacheEvent,
     ) -> None:
 
         self.response_cache.set(
-            key=input_dto.cache_key,
-            value=input_dto.generated_response,
+            key=event.cache_key,
+            value=event.generated_response,
             ttl=3600,
         )
