@@ -17,7 +17,7 @@ The platform uses a **clean architecture** and **event-driven design** to handle
 
 ## Architecture Overview
 
-[![DocInsight Architecture Flow](docs/images/architecture-flow.png)](docs/images/architecture-flow.png)
+[![DocInsight Architecture Flow](docs/images/project-worflow.png)](docs/images/project-worflow.png)
 
 ### Tech Stack
 
