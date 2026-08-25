@@ -17,6 +17,8 @@ The platform uses a **clean architecture** and **event-driven design** to handle
 
 ## Architecture Overview
 
+[![DocInsight Architecture Flow](docs/images/architecture-flow.png)](docs/images/architecture-flow.png)
+
 ### Tech Stack
 
 - **Compute**: AWS Lambda (Python 3.11)
