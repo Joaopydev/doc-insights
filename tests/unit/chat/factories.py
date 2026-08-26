@@ -1,3 +1,6 @@
+from typing import Optional
+
+from src.shared.domain.value_objects.document_status import DocumentStatus
 from src.shared.domain.entities.document import Document
 from src.chat.domain.entities.conversation import Conversation
 
@@ -7,14 +10,23 @@ from src.chat.application.ports.document_repository import DocumentRepository
 from src.shared.application.ports.event_publisher import EventPublisher
 
 
-def create_document(user_id: str, filename: str, content_type: str):
-    return Document.create(
+def create_document(
+    user_id: str,
+    filename: str,
+    content_type: str,
+    document_status: Optional[DocumentStatus] = None
+):
+    document = Document.create(
         user_id=user_id,
         metadata={
             "filename": filename,
             "content_type": content_type,
         }
     )
+    if document_status:
+        document.status = document_status
+
+    return document
 
 def create_conversation(document_id: str, user_id: str):
     return Conversation.create(
