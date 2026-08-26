@@ -49,9 +49,28 @@ jobs:
             -t 553004107808.dkr.ecr.us-east-1.amazonaws.com/document-analyzer-image:$IMAGE_TAG \
             -t 553004107808.dkr.ecr.us-east-1.amazonaws.com/document-analyzer-image:latest \
             --push .
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt --prefer-binary --disable-pip-version-check
+          pip install pytest
+
+      - name: Run tests
+        run: pytest
 
   deploy:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
