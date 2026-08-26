@@ -10,7 +10,6 @@ from src.shared.domain.entities.document import Document
 from src.shared.application.ports.storage_port import StoragePort
 
 
-
 class CreateDocumentUseCase:
 
     def __init__(

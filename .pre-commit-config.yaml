@@ -15,6 +15,7 @@ repos:
           - pgvector
           - redis
           - aws_lambda_powertools
+          - pytest
         args:
           [
             "-rn",
