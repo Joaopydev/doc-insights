@@ -16,6 +16,7 @@ repos:
           - redis
           - aws_lambda_powertools
           - pytest
+          - pytest-asyncio
         args:
           [
             "-rn",
