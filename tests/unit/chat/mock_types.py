@@ -5,3 +5,6 @@ DocumentRepositoryMock = Mock
 EventPublisherMock = Mock
 MessagePublisherMock = Mock
 ResponseCacheMock = Mock
+EmbeddingGeneratorMock = Mock
+VectorRepositoryMock = Mock
+ResponseGeneratorMock = Mock
