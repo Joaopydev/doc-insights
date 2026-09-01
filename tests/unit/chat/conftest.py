@@ -7,6 +7,7 @@ import pytest
 from src.chat.application.use_cases.ask_question.ask_question import AskQuestionUseCase
 from src.chat.application.use_cases.question_processing.question_processing_started import QuestionProcessingUseCase
 from src.chat.application.use_cases.question_processing.process_question import ProcessQuestionUseCase
+from src.chat.application.use_cases.get_messages.get_messages import GetMessagesUseCase
 
 from src.chat.application.ports.response_cache import ResponseCache
 from src.chat.application.ports.chat_repository import ChatRepository
@@ -91,4 +92,10 @@ def process_question_use_case(mock_repositories) -> ProcessQuestionUseCase:
         embedding_generator=mock_repositories["embedding_generator"],
         event_publisher=mock_repositories["event_publisher"],
         vector_repository=mock_repositories["vector_repository"],
+    )
+
+@pytest.fixture
+def get_messages_use_case(mock_repositories) -> GetMessagesUseCase:
+    return GetMessagesUseCase(
+        chat_repository=mock_repositories["chat_repository"]
     )
