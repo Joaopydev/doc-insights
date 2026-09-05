@@ -174,12 +174,6 @@ functions:
               - docinsight.chat
             detail-type:
               - QuestionAsked
-    vpc:
-      securityGroupIds:
-        - ${env:LAMBDA_SECURITY_GROUP_ID}
-      subnetIds:
-        - ${env:SUBNET_ID}
-        - ${env:SUBNET2_ID}
     timeout: 15
 
   updateCache:
@@ -194,12 +188,6 @@ functions:
               - docinsight.chat
             detail-type:
               - UpdateCache
-    vpc:
-      securityGroupIds:
-        - ${env:LAMBDA_SECURITY_GROUP_ID}
-      subnetIds:
-        - ${env:SUBNET_ID}
-        - ${env:SUBNET2_ID}
     timeout: 15
 
   processQuestion:
