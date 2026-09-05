@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     websocket_endpoint: str
     redis_host: str
     redis_port: str
+    redis_password: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

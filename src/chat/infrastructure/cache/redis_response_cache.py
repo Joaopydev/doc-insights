@@ -16,6 +16,7 @@ class RedisResponseCache(ResponseCache):
         self.redis_client = redis.Redis(
             host=settings.redis_host,
             port=int(settings.redis_port),
+            password=settings.redis_password,
             decode_responses=True,
             socket_connect_timeout=5,
             socket_timeout=5,
