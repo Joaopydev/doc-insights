@@ -10,9 +10,9 @@ def handler(event: Dict[str, Any], context: Any):
         http_response = APIGatewayRequestAdapter.adapt(
             event=event,
             controller=MeComposer.compose(),
+            auth_required=True,
         )
     except Exception as e:
-        print(e)
         http_response = ExceptionResponseBuilder.build(e)
 
     return http_response.to_dict()
