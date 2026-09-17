@@ -20,5 +20,5 @@ class UserLoginController(ControllerInterface):
 
         return HTTPResponse(
             status_code=200,
-            body={"access_token": output.access_token}
+            body={"accessToken": output.access_token}
         )

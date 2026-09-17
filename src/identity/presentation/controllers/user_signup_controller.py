@@ -21,5 +21,5 @@ class UserSignupController(ControllerInterface):
 
         return HTTPResponse(
             status_code=201,
-            body={"access_token": output.access_token}
+            body={"accessToken": output.access_token}
         )
