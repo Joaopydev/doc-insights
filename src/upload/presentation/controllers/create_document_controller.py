@@ -21,7 +21,7 @@ class CreateDocumentController(ControllerInterface):
         return HTTPResponse(
             status_code=201,
             body={
-                "document": output.document.to_dict(),
+                "document_id": output.document.id,
                 "presigned_url": output.presigned_url
             }
         )

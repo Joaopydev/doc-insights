@@ -6,6 +6,20 @@ provider:
   region: us-east-1
   runtime: python3.11
   architecture: x86_64
+
+  httpApi:
+    cors:
+      allowedOrigins:
+        - http://localhost:5173
+      allowedMethods:
+        - POST
+        - GET
+        - PUT
+        - OPTIONS
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+
   environment:
     BUCKET_NAME: !Ref UploadsBucket
     DOCUMENT_TABLE: !Ref DocumentTable
