@@ -15,5 +15,11 @@ class GetMeController(ControllerInterface):
 
         return HTTPResponse(
             status_code=200,
-            body={"user": output.to_dict()}
+            body={
+                "user": {
+                    "id": output.id,
+                    "name": output.name,
+                    "email": output.email,
+                }
+            }
         )
