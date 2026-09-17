@@ -12,6 +12,7 @@ def handler(event: Dict[str, Any], context: Any):
             controller=MeComposer.compose(),
         )
     except Exception as e:
+        print(e)
         http_response = ExceptionResponseBuilder.build(e)
 
     return http_response.to_dict()
