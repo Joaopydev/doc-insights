@@ -128,7 +128,7 @@ functions:
     events:
       - httpApi:
           path: /me
-          method: POST
+          method: GET
 
   startExtracting:
     image:
