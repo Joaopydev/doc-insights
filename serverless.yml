@@ -120,6 +120,16 @@ functions:
           path: /signup
           method: POST
 
+  me:
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.me.handler.handler
+    events:
+      - httpApi:
+          path: /me
+          method: POST
+
   startExtracting:
     image:
       uri: ${env:ECR_IMAGE_URI}
