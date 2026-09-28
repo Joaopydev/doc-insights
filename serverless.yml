@@ -316,6 +316,19 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: docinsight-raw-documents
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - http://localhost:5173
+              AllowedMethods:
+                - GET
+                - PUT
+                - HEAD
+              AllowedHeaders:
+                - "*"
+              ExposedHeaders:
+                - ETag
+              MaxAge: 3000
         NotificationConfiguration:
           EventBridgeConfiguration:
             EventBridgeEnabled: true
