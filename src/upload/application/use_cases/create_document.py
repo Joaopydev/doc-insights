@@ -27,7 +27,7 @@ class CreateDocumentUseCase:
 
         document = Document.create(
             user_id=create_document_input.user_id,
-            metadata=create_document_input.metadata.model_dump()
+            metadata=create_document_input.metadata.model_dump(mode="json")
         )
         self.document_repository.insert_document(document)
 
