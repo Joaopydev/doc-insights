@@ -1,5 +1,5 @@
-from src.upload.application.use_cases.create_document import CreateDocumentUseCase
-from src.upload.application.use_cases.create_document_dto import CreateDocumentInput
+from src.upload.application.use_cases.create.create_document import CreateDocumentUseCase
+from src.upload.application.use_cases.create.create_document_dto import CreateDocumentInput
 
 from src.shared.presentation.interfaces.controller_interface import ControllerInterface
 from src.shared.presentation.http_types.http_request import HTTPRequest

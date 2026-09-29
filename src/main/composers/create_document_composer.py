@@ -4,7 +4,7 @@ from src.shared.infrastructure.dynamodb.client import DynamoDBClient
 from src.shared.infrastructure.storage.s3 import S3Client
 
 from src.upload.infrastructure.repositories.document_repository import DocumentRepository
-from src.upload.application.use_cases.create_document import CreateDocumentUseCase
+from src.upload.application.use_cases.create.create_document import CreateDocumentUseCase
 from src.upload.presentation.controllers.create_document_controller import CreateDocumentController
 
 

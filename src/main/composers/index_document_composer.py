@@ -9,6 +9,7 @@ from src.shared.infrastructure.storage.s3 import S3Client
 from src.shared.infrastructure.dynamodb.client import DynamoDBClient
 from src.shared.infrastructure.ai.client import OpenAIClient
 from src.shared.infrastructure.ai.embedding_generator import EmbeddingGenerator
+from src.shared.infrastructure.eventbridge.client import EventBridgeClient
 
 
 class IndexDocumentComposer:
@@ -20,6 +21,7 @@ class IndexDocumentComposer:
         chunk_generator = RecursiveChunkGenerator()
         embedding_generator = EmbeddingGenerator(OpenAIClient())
         storage_port = S3Client()
+        event_publisher = EventBridgeClient()
 
         use_case = IndexDocumentUseCase(
             repository=repository,
@@ -27,6 +29,7 @@ class IndexDocumentComposer:
             chunk_generator=chunk_generator,
             embedding_generator=embedding_generator,
             storage_port=storage_port,
+            event_publisher=event_publisher,
         )
 
         return use_case.execute

@@ -1,7 +1,7 @@
 from src.upload.application.ports.document_repository import (
     DocumentRepository as DocumentRepositoryInterface
 )
-from src.upload.application.use_cases.create_document_dto import (
+from src.upload.application.use_cases.create.create_document_dto import (
     CreateDocumentInput,
     CreateDocumentOutput,
 )

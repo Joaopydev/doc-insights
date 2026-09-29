@@ -3,8 +3,10 @@ from src.processing.application.ports.document_processing_repository import Docu
 
 from src.shared.application.ports.vector_repository import VectorRepository
 from src.shared.application.ports.embedding_generator import EmbeddingGenerator
-from src.shared.domain.value_objects.document_status import DocumentStatus
 from src.shared.application.ports.storage_port import StoragePort
+from src.shared.application.ports.event_publisher import EventPublisher
+from src.shared.application.events.create_conversation_event import CreateConversationEvent
+from src.shared.domain.value_objects.document_status import DocumentStatus
 
 
 class IndexDocumentUseCase:
@@ -16,12 +18,14 @@ class IndexDocumentUseCase:
         chunk_generator: ChunkGenerator,
         embedding_generator: EmbeddingGenerator,
         storage_port: StoragePort,
+        event_publisher: EventPublisher,
     ):
         self.repository = repository
         self.vector_repository = vector_repository
         self.chunk_generator = chunk_generator
         self.embedding_generator = embedding_generator
         self.storage_port = storage_port
+        self.event_publisher = event_publisher
 
     async def execute(self, extracted_text_key: str) -> None:
         document = self.repository.get_document_by_extracted_text_key(extracted_text_key)
@@ -51,4 +55,11 @@ class IndexDocumentUseCase:
         self.repository.update_status(
             document_id=document.id,
             status=DocumentStatus.READY
+        )
+
+        self.event_publisher.publish(
+            CreateConversationEvent(
+                user_id=document.user_id,
+                document_id=document.id,
+            )
         )

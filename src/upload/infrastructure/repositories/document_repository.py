@@ -17,3 +17,34 @@ class DocumentRepository(DocumentRepositoryInterface):
             table_name=settings.document_table,
             item=document.to_dict()
         )
+
+    def get_document_by_id(self, document_id: str) -> Document:
+        item = self.db_client.get_item(
+            table_name=settings.document_table,
+            key={
+                "id": document_id,
+            }
+        )
+
+        if not item:
+            return None
+
+        return Document.restore(
+            document_id=item["id"],
+            user_id=item["user_id"],
+            s3_key=item["s3_key"],
+            extracted_text_key=item["extracted_text_key"],
+            metadata=item["metadata"],
+            status=item["status"],
+            created_at=item["created_at"],
+            updated_at=item["updated_at"],
+            textract_job_id=item["textract_job_id"]
+        )
+
+    def delete_document_by_id(self, document_id: str) -> None:
+        self.db_client.delete_item(
+            table_name=settings.document_table,
+            key={
+                "id": document_id,
+            }
+        )

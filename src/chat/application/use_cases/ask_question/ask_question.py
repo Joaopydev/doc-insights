@@ -4,7 +4,6 @@ from src.chat.application.use_cases.ask_question.ask_question_dto import (
 )
 from src.chat.application.ports.chat_repository import ChatRepository
 from src.chat.domain.entities.chat_message import ChatMessage
-from src.chat.domain.entities.conversation import Conversation
 from src.chat.domain.value_objects.message_type import MessageType
 from src.chat.application.events.question_asked_event import QuestionAskedEvent
 from src.chat.application.ports.document_repository import DocumentRepository
@@ -12,6 +11,7 @@ from src.chat.application.ports.document_repository import DocumentRepository
 from src.errors.types.document_not_found import DocumentNotFound
 from src.errors.types.document_not_ready import DocumentNotReady
 from src.errors.types.unauthorized_document_access import UnauthorizedDocumentAccess
+from src.errors.types.conversation_not_found import ConversationNotFound
 
 
 from src.shared.application.ports.event_publisher import EventPublisher
@@ -46,11 +46,7 @@ class AskQuestionUseCase:
 
         conversation = self.chat_repository.get_conversation_by_document_id(question_input.document_id)
         if not conversation:
-            conversation = Conversation.create(
-                document_id=question_input.document_id,
-                user_id=question_input.user_id
-            )
-            self.chat_repository.save_conversation(conversation)
+            raise ConversationNotFound("Conversation not found.")
 
         message = ChatMessage.create(
             conversation_id=conversation.id,
