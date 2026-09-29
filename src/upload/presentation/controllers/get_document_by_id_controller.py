@@ -14,7 +14,7 @@ class GetDocumentByIdController(ControllerInterface):
     def handle(self, request: HTTPRequest) -> HTTPResponse:
         input_data = GetDocumentByIdInput(
             user_id=request.user_id,
-            document_id=request.body["document_id"]
+            document_id=request.params["document_id"]
         )
 
         output = self.use_case.execute(input_data)
