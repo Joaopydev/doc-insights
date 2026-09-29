@@ -7,6 +7,7 @@ from src.shared.domain.value_objects.document_status import DocumentStatus
 from src.errors.types.document_not_found import DocumentNotFound
 from src.errors.types.document_not_ready import DocumentNotReady
 from src.errors.types.unauthorized_document_access import UnauthorizedDocumentAccess
+from src.errors.types.conversation_not_found import ConversationNotFound
 
 from tests.unit.chat.factories import (
     create_document,
@@ -123,29 +124,15 @@ def test_ask_question_with_non_existent_conversation(ask_question_use_case):
             document_id=document.id,
             question="Will the flow pass?"
         )
-    output = ask_question_use_case.execute(question_input)
 
-    saved_message = ask_question_use_case.chat_repository.save_message.call_args.args[0]
-    saved_conversation = ask_question_use_case.chat_repository.save_conversation.call_args.args[0]
-
-    assert output.message_id == saved_message.id
-    assert output.conversation_id == saved_conversation.id
+    with pytest.raises(ConversationNotFound):
+        ask_question_use_case.execute(
+            AskQuestionInput(
+                user_id=document.user_id,
+                document_id=document.id,
+                question=question_input.question,
+            )
+        )
 
     ask_question_use_case.chat_repository.get_conversation_by_document_id.assert_called_once_with(question_input.document_id)
-    ask_question_use_case.chat_repository.save_conversation.assert_called_once()
-
-    assert saved_conversation.document_id == document.id
-    assert saved_conversation.user_id == document.user_id
-
-    ask_question_use_case.chat_repository.save_message.assert_called_once()
-
-    assert saved_message.conversation_id == saved_conversation.id
-    assert saved_message.content == question_input.question
-    assert saved_message.message_type == MessageType.QUESTION
-
-    ask_question_use_case.event_publisher.publish.assert_called_once()
-
-    saved_event = ask_question_use_case.event_publisher.publish.call_args.args[0]
-
-    assert saved_event.message_id == saved_message.id
-    assert saved_event.document_id == document.id
+    ask_question_use_case.document_repository.get_document_by_id.assert_called_once_with(question_input.document_id)
