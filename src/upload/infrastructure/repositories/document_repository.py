@@ -38,7 +38,7 @@ class DocumentRepository(DocumentRepositoryInterface):
             status=item["status"],
             created_at=item["created_at"],
             updated_at=item["updated_at"],
-            textract_job_id=item["textract_job_id"]
+            textract_job_id=item.get("textract_job_id")
         )
 
     def delete_document_by_id(self, document_id: str) -> None:
