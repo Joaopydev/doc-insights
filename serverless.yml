@@ -15,6 +15,7 @@ provider:
         - POST
         - GET
         - PUT
+        - DELETE
         - OPTIONS
       allowedHeaders:
         - Content-Type
