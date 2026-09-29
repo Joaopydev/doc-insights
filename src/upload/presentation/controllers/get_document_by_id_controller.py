@@ -24,7 +24,7 @@ class GetDocumentByIdController(ControllerInterface):
                 "document": {
                     "id": output.document.id,
                     "status": output.document.status.value,
-                    "created_at": output.document.created_at
+                    "created_at": output.document.created_at.isoformat()
                 }
             }
         )
