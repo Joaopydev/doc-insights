@@ -32,3 +32,18 @@ class DocumentRepository(DocumentRepositoryInterface):
             created_at=item["created_at"],
             updated_at=item["updated_at"],
         )
+
+    def update_conversation_id(self, document_id: str, conversation_id: str) -> None:
+        self.db_client.update_item(
+            table_name=settings.document_table,
+            key={
+                "id": document_id
+            },
+            update_expression="SET #conversation_id = :conversation_id",
+            expression_attribute_names={
+                "#conversation_id": "conversation_id"
+            },
+            expression_attribute_values={
+                ":conversation_id": conversation_id
+            }
+        )

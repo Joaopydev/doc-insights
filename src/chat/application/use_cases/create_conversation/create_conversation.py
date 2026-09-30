@@ -31,3 +31,7 @@ class CreateConversationUseCase:
             user_id=event.user_id
         )
         self.chat_repository.save_conversation(conversation)
+        self.document_repository.update_conversation_id(
+            document_id=document.id,
+            conversation_id=conversation.id,
+        )
