@@ -21,6 +21,7 @@ class Document:
     created_at: datetime
     updated_at: datetime
     textract_job_id: Optional[str] = None
+    conversation_id: Optional[str] = None
 
     @classmethod
     def create(
@@ -64,7 +65,8 @@ class Document:
         status: str,
         created_at: str,
         updated_at: str,
-        textract_job_id: Optional[str] = None
+        textract_job_id: Optional[str] = None,
+        conversation_id: Optional[str] = None,
     ):
         return cls(
             id=document_id,
@@ -76,6 +78,7 @@ class Document:
             created_at=datetime.fromisoformat(created_at),
             updated_at=datetime.fromisoformat(updated_at),
             textract_job_id=textract_job_id,
+            conversation_id=conversation_id,
         )
 
     def to_dict(self):
@@ -92,5 +95,7 @@ class Document:
 
         if self.textract_job_id:
             attributes.update({"textract_job_id": self.textract_job_id})
+        if self.conversation_id:
+            attributes.update({"conversation_id": self.conversation_id})
 
         return attributes

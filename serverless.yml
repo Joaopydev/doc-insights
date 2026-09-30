@@ -247,6 +247,16 @@ functions:
           path: /document/{document_id}
           method: GET
 
+  getConversationById:
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.get_conversation_by_id.handler.handler
+    events:
+      - httpApi:
+          path: /conversation/{conversation_id}
+          method: GET
+
   createConversation:
     image:
       uri: ${env:ECR_IMAGE_URI}

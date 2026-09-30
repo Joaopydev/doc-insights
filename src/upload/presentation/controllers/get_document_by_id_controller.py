@@ -14,7 +14,7 @@ class GetDocumentByIdController(ControllerInterface):
     def handle(self, request: HTTPRequest) -> HTTPResponse:
         input_data = GetDocumentByIdInput(
             user_id=request.user_id,
-            document_id=request.params["document_id"]
+            document_id=request.params["conversation_id"]
         )
 
         output = self.use_case.execute(input_data)
@@ -24,7 +24,8 @@ class GetDocumentByIdController(ControllerInterface):
                 "document": {
                     "id": output.document.id,
                     "status": output.document.status.value,
-                    "created_at": output.document.created_at.isoformat()
+                    "created_at": output.document.created_at.isoformat(),
+                    "conversation_id": output.document.conversation_id,
                 }
             }
         )
