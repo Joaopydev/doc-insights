@@ -54,5 +54,5 @@ class Conversation:
             "name": self.name,
             "document_id": self.document_id,
             "user_id": self.user_id,
-            "created_at": self.created_at.isoformat(),
+            "created_at": self.created_at.isoformat() if isinstance(self.created_at, datetime) else self.created_at,
         }
