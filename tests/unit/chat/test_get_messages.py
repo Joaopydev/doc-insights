@@ -29,6 +29,7 @@ def test_execute_should_return_conversation_not_found_when_conversation_does_not
 
 def test_execute_should_return_conversation_not_found_if_user_is_not_the_owner(get_messages_use_case):
     conversation = create_conversation(
+        name="Test Conversation",
         document_id="test-document-id",
         user_id="test-user-id-1",
     )
@@ -47,6 +48,7 @@ def test_execute_should_return_conversation_not_found_if_user_is_not_the_owner(g
 
 def test_execute_should_return_succesfully_when_conversation_exists(get_messages_use_case):
     conversation = create_conversation(
+        name="Test Conversation",
         document_id="test-document-id",
         user_id="test-user-id-1",
     )

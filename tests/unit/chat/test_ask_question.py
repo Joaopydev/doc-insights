@@ -77,6 +77,7 @@ def test_ask_question_with_existent_conversation(ask_question_use_case):
     ask_question_use_case.document_repository.get_document_by_id.return_value = document
 
     conversation = create_conversation(
+        name=document.metadata.filename,
         document_id=document.id,
         user_id=document.user_id,
     )

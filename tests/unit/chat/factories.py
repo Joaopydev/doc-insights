@@ -27,10 +27,12 @@ def create_document(
     return document
 
 def create_conversation(
+    name: str,
     document_id: str,
     user_id: str
 ) -> Conversation:
     return Conversation.create(
+        name=name,
         document_id=document_id,
         user_id=user_id,
     )
