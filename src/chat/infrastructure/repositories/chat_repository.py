@@ -61,6 +61,7 @@ class ChatRepository(ChatRepositoryInterface):
 
         return Conversation.restore(
             conversation_id=item["id"],
+            name=item["name"],
             document_id=item["document_id"],
             user_id=item["user_id"],
             created_at=item["created_at"],
@@ -78,6 +79,7 @@ class ChatRepository(ChatRepositoryInterface):
 
         return Conversation.restore(
             conversation_id=item["id"],
+            name=item["name"],
             document_id=item["document_id"],
             user_id=item["user_id"],
             created_at=item["created_at"],
@@ -99,6 +101,27 @@ class ChatRepository(ChatRepositoryInterface):
                 conversation_id=item["conversation_id"],
                 content=item["content"],
                 message_type=item["message_type"],
+                created_at=item["created_at"],
+            )
+            for item in items
+        ]
+
+    def list_conversations_by_user_id(self, user_id: str) -> List[Conversation]:
+        items = self.db_client.query_many(
+            table_name=settings.conversation_table,
+            index_name="user-id-index",
+            key_name="user_id",
+            key_value=user_id,
+        )
+        if not items:
+            return []
+
+        return [
+            Conversation.restore(
+                conversation_id=item["id"],
+                name=item["name"],
+                document_id=item["document_id"],
+                user_id=item["user_id"],
                 created_at=item["created_at"],
             )
             for item in items

@@ -30,3 +30,7 @@ class ChatRepository(ABC):
     @abstractmethod
     def get_conversation_by_id(self, conversation_id: str) -> Optional[Conversation]:
         pass
+
+    @abstractmethod
+    def list_conversations_by_user_id(self, user_id: str) -> List[Conversation]:
+        pass

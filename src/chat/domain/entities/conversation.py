@@ -7,6 +7,7 @@ from uuid import uuid4
 @dataclass
 class Conversation:
     id: str
+    name: str
     document_id: str
     user_id: str
     created_at: datetime
@@ -14,6 +15,7 @@ class Conversation:
     @classmethod
     def create(
         cls,
+        name: str,
         document_id: str,
         user_id: str,
     ) -> "Conversation":
@@ -22,6 +24,7 @@ class Conversation:
 
         return cls(
             id=conversation_id,
+            name=name,
             document_id=document_id,
             user_id=user_id,
             created_at=created_at,
@@ -31,6 +34,7 @@ class Conversation:
     def restore(
         cls,
         conversation_id: str,
+        name: str,
         document_id: str,
         user_id: str,
         created_at: datetime,
@@ -38,6 +42,7 @@ class Conversation:
 
         return cls(
             id=conversation_id,
+            name=name,
             document_id=document_id,
             user_id=user_id,
             created_at=created_at,
@@ -46,6 +51,7 @@ class Conversation:
     def to_dict(self) -> Dict[str, str]:
         return {
             "id": self.id,
+            "name": self.name,
             "document_id": self.document_id,
             "user_id": self.user_id,
             "created_at": self.created_at.isoformat(),

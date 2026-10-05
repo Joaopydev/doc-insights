@@ -281,6 +281,17 @@ functions:
           path: /messages/{conversation_id}
           method: GET
 
+  listUserConversations:
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.list_user_conversations.handler.handler
+    events:
+      - httpApi:
+          path: /conversations
+          method: GET
+
+
   websocketConnect:
     image:
       uri: ${env:ECR_IMAGE_URI}
@@ -492,6 +503,8 @@ resources:
             AttributeType: S
           - AttributeName: document_id
             AttributeType: S
+          - AttributeName: user_id
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
@@ -499,6 +512,13 @@ resources:
           - IndexName: document-id-index
             KeySchema:
               - AttributeName: document_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+          - IndexName: user-id-index
+            KeySchema:
+              - AttributeName: user_id
                 KeyType: HASH
             Projection:
               ProjectionType: ALL

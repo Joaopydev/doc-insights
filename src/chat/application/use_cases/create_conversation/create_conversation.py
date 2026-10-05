@@ -27,6 +27,7 @@ class CreateConversationUseCase:
             return
 
         conversation = Conversation.create(
+            name=document.metadata.filename,
             document_id=event.document_id,
             user_id=event.user_id
         )
