@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from src.chat.domain.entities.chat_message import ChatMessage
+
 
 class AskQuestionInput(BaseModel):
     user_id: str
@@ -8,5 +10,4 @@ class AskQuestionInput(BaseModel):
 
 
 class AskQuestionOutput(BaseModel):
-    message_id: str
-    conversation_id: str
+    message: ChatMessage

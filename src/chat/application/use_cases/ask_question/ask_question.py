@@ -63,6 +63,5 @@ class AskQuestionUseCase:
         )
 
         return AskQuestionOutput(
-            message_id=message.id,
-            conversation_id=message.conversation_id,
+            message=message
         )

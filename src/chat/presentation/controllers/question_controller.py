@@ -23,7 +23,6 @@ class QuestionController(ControllerInterface):
         return HTTPResponse(
             status_code=202,
             body={
-                "message_id": output.message_id,
-                "conversation_id": output.conversation_id
+                "message": output.message.to_dict()
             }
         )
