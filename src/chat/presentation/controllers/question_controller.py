@@ -12,6 +12,7 @@ class QuestionController(ControllerInterface):
         self.use_case = use_case
 
     def handle(self, request: HTTPRequest) -> HTTPResponse:
+        print (request.body)
         input_data = AskQuestionInput(
             user_id=request.user_id,
             document_id=request.body["document_id"],
