@@ -92,8 +92,7 @@ def test_ask_question_with_existent_conversation(ask_question_use_case):
 
     saved_message = ask_question_use_case.chat_repository.save_message.call_args.args[0]
 
-    assert output.message_id == saved_message.id
-    assert output.conversation_id == conversation.id
+    assert output.message == saved_message
 
     ask_question_use_case.chat_repository.save_conversation.assert_not_called()
     ask_question_use_case.chat_repository.save_message.assert_called_once()
