@@ -19,5 +19,5 @@ class Connection:
         return {
             "connection_id": self.id,
             "user_id": self.user_id,
-            "created_at": self.created_at
+            "created_at": self.created_at.isoformat()
         }
