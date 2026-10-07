@@ -20,4 +20,6 @@ class GetMessagesUseCase:
             raise ConversationNotFound("Conversation not found.")
 
         messages = self.chat_repository.get_messages(input_dto.conversation_id)
+        messages.sort(key=lambda message: message.created_at, reverse=True)
+
         return GetMessagesOutPut(messages=messages)
