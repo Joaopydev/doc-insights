@@ -27,6 +27,7 @@ class WebSocketService(WebSocketServiceInterface):
         data: dict
     ) -> None:
         try:
+            print(f"CONNECTION ID: {connection_id}")
             self.gateway_client.get_connection(connection_id)
             self.gateway_client.post_to_connection(
                 connection_id=connection_id,
