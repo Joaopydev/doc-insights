@@ -14,6 +14,7 @@ class GatewayClient(GatewayClientInterface):
             service_name='apigatewaymanagementapi',
             endpoint_url=settings.websocket_endpoint
         )
+        print(f"ENDPOINT: {settings.websocket_endpoint}")
 
     def post_to_connection(self, connection_id, data):
         return self.client.post_to_connection(

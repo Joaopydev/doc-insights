@@ -24,7 +24,7 @@ class ConnectionRepository(ConnectionRepositoryInterface):
         self.db_client.delete_item(
             table_name=settings.connections_table,
             key={
-                "connection_id": {"S": connection_id}
+                "connection_id": connection_id
             }
         )
 
