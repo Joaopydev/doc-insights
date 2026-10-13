@@ -27,8 +27,13 @@ class WebSocketService(WebSocketServiceInterface):
         data: dict
     ) -> None:
         try:
-            self.gateway_client.post_to_connection(connection_id, data)
+            self.gateway_client.get_connection(connection_id)
+            self.gateway_client.post_to_connection(
+                connection_id=connection_id,
+                data=data,
+            )
         except ClientError as e:
+            print(e)
             error_code = e.response['Error']['Code']
             if error_code == 'GoneException':
                 logging.info("Client %s desconnected. Cleaning database.", connection_id)
@@ -40,5 +45,6 @@ class WebSocketService(WebSocketServiceInterface):
                 logging.error("Client API Gateway WebSocket Error: %s", e)
                 raise
         except Exception as e:
+            print(e)
             logging.error("Generic failure to send message via WebSocket.: %s", e)
             raise
