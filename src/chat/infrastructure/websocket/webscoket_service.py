@@ -1,5 +1,3 @@
-import logging
-
 from botocore.exceptions import ClientError
 
 from src.chat.application.ports.websocket_service import (
@@ -7,6 +5,7 @@ from src.chat.application.ports.websocket_service import (
 )
 from src.chat.application.ports.gateway_client import GatewayClient
 from src.chat.application.ports.connection_repository import ConnectionRepository
+from src.main.config.logger import logger
 
 
 class WebSocketService(WebSocketServiceInterface):
@@ -27,25 +26,22 @@ class WebSocketService(WebSocketServiceInterface):
         data: dict
     ) -> None:
         try:
-            print(f"CONNECTION ID: {connection_id}")
             self.gateway_client.get_connection(connection_id)
             self.gateway_client.post_to_connection(
                 connection_id=connection_id,
                 data=data,
             )
         except ClientError as e:
-            print(e)
             error_code = e.response['Error']['Code']
             if error_code == 'GoneException':
-                logging.info("Client %s desconnected. Cleaning database.", connection_id)
+                logger.info("Client %s desconnected. Cleaning database.", connection_id)
                 try:
                     self.connection_repository.delete_connection(connection_id)
                 except Exception as db_err:
-                    logging.error("Failed to delete connection on DynamoDB: %s", db_err)
+                    logger.error("Failed to delete connection on DynamoDB: %s", db_err)
             else:
-                logging.error("Client API Gateway WebSocket Error: %s", e)
+                logger.error("Client API Gateway WebSocket Error: %s", e)
                 raise
         except Exception as e:
-            print(e)
-            logging.error("Generic failure to send message via WebSocket.: %s", e)
+            logger.error("Generic failure to send message via WebSocket.: %s", e)
             raise
