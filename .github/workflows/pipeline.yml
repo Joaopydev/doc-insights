@@ -63,7 +63,7 @@ jobs:
         volumes:
           - "/var/run/docker.sock:/var/run/docker.sock"
         options: >-
-          --health-cmd "awslocal status services"
+          --health-cmd "curl -sS http://localhost:4566/_localstack/health || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
