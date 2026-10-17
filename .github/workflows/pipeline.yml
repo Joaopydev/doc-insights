@@ -59,6 +59,9 @@ jobs:
           - 4566:4566
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        volumes:
+          - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+          - "/var/run/docker.sock:/var/run/docker.sock"
         options: >-
           --health-cmd "awslocal status services"
           --health-interval 10s
