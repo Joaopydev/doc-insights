@@ -6,11 +6,14 @@ from src.shared.application.ports.storage_port import StoragePort
 from src.main.config.settings import settings
 
 
-
 class S3Client(StoragePort):
 
     def __init__(self):
-        self.s3_client = boto3.client("s3")
+        self.s3_client = boto3.client(
+            "s3",
+            endpoint_url=settings.aws_endpoint_url,
+            region_name=settings.aws_default_region,
+        )
 
     def generate_presigned_url(
         self,

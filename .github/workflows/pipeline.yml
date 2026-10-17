@@ -52,6 +52,18 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
+    services:
+      localstack:
+        image: localstack/localstack:latest
+        ports:
+          - 4566:4566
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        options: >-
+          --health-cmd "awslocal status services"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,7 +79,15 @@ jobs:
           pip install pytest
           pip install pytest-asyncio
 
+      - name: Wait for LocalStack to be healthy
+        run: |
+          echo "Waiting for LocalStack on port 4566..."
+          curl --silent --fail http://localhost:4566/_localstack/health || exit 1
+
       - name: Run tests
+        env:
+          AWS_ACCESS_KEY_ID: mock_key
+          AWS_SECRET_ACCESS_KEY: mock_secret
         run: pytest
 
   deploy:
@@ -106,3 +126,4 @@ jobs:
           SUBNET_ID: ${{ secrets.SUBNET_ID }}
           SUBNET2_ID: ${{ secrets.SUBNET2_ID }}
           LAMBDA_SECURITY_GROUP_ID: ${{ secrets.LAMBDA_SECURITY_GROUP_ID }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}

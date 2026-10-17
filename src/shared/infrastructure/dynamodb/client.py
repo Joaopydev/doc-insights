@@ -2,12 +2,17 @@ import boto3
 from boto3.dynamodb.conditions import Key
 
 from src.shared.application.ports.db_client import DBClient
+from src.main.config.settings import settings
 
 
 class DynamoDBClient(DBClient):
 
     def __init__(self):
-        self.__dynamodb_resource = boto3.resource("dynamodb")
+        self.__dynamodb_resource = boto3.resource(
+            "dynamodb",
+            endpoint_url=settings.aws_endpoint_url,
+            region_name=settings.aws_default_region,
+        )
 
     def save(self, table_name: str, item: dict):
         table = self._get_table(table_name)

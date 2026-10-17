@@ -13,7 +13,6 @@ def handler(event: Dict[str, Any], context: Any):
             auth_required=True
         )
     except Exception as e:
-        print("Error in handler:", e)
         http_response = ExceptionResponseBuilder.build(e)
 
     return http_response.to_dict()

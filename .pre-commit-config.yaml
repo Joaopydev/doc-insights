@@ -17,6 +17,7 @@ repos:
           - aws_lambda_powertools
           - pytest
           - pytest-asyncio
+          - python-dotenv
         args:
           [
             "-rn",

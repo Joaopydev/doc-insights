@@ -40,6 +40,7 @@ provider:
     QUESTIONS_QUEUE: !Ref QuestionsQueue
     WEBSOCKET_ENDPOINT:
       Fn::Sub: "https://${WebsocketsApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}"
+    AWS_DEFAULT_REGION: ${env:AWS_DEFAULT_REGION}
 
   iam:
     role:
