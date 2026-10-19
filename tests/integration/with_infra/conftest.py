@@ -47,3 +47,5 @@ def setup_localstack_infrastructure():
         ],
         ProvisionedThroughput={"ReadCapacityUnits": 5, "WriteCapacityUnits": 5},
     )
+
+    yield
