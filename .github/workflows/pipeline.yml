@@ -5,7 +5,49 @@ on:
             - master
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      localstack:
+        image: localstack/localstack:2026.10.0
+        ports:
+          - "4566:4566"
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/_localstack/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 20s
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt --prefer-binary --disable-pip-version-check
+          pip install pytest
+          pip install pytest-asyncio
+
+      - name: Wait for LocalStack to be healthy
+        run: |
+          echo "Waiting for LocalStack on port 4566..."
+          curl --silent --fail http://localhost:4566/_localstack/health || exit 1
+
+      - name: Run tests
+        env:
+          AWS_ACCESS_KEY_ID: mock_key
+          AWS_SECRET_ACCESS_KEY: mock_secret
+        run: pytest
+
   build:
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -49,52 +91,8 @@ jobs:
             -t 553004107808.dkr.ecr.us-east-1.amazonaws.com/document-analyzer-image:$IMAGE_TAG \
             -t 553004107808.dkr.ecr.us-east-1.amazonaws.com/document-analyzer-image:latest \
             --push .
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    services:
-      localstack:
-        image: localstack/localstack:latest
-        ports:
-          - "4566:4566"
-          - "4510-4559:4510-4559"
-        env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
-        volumes:
-          - "/var/run/docker.sock:/var/run/docker.sock"
-        options: >-
-          --health-cmd "curl -sS http://localhost:4566/_localstack/health || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt --prefer-binary --disable-pip-version-check
-          pip install pytest
-          pip install pytest-asyncio
-
-      - name: Wait for LocalStack to be healthy
-        run: |
-          echo "Waiting for LocalStack on port 4566..."
-          curl --silent --fail http://localhost:4566/_localstack/health || exit 1
-
-      - name: Run tests
-        env:
-          AWS_ACCESS_KEY_ID: mock_key
-          AWS_SECRET_ACCESS_KEY: mock_secret
-        run: pytest
-
   deploy:
-    needs: test
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
