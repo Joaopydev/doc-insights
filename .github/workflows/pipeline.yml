@@ -7,19 +7,6 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    services:
-      localstack:
-        image: localstack/localstack:2026.10.0
-        ports:
-          - "4566:4566"
-        env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
-        options: >-
-          --health-cmd "curl -f http://localhost:4566/_localstack/health || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-          --health-start-period 20s
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,6 +15,30 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
+
+      - name: Start LocalStack
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: |
+          docker run -d --name localstack \
+            -p 4566:4566 \
+            -e LOCALSTACK_AUTH_TOKEN=$LOCALSTACK_AUTH_TOKEN \
+            localstack/localstack:2026.10.0
+
+      - name: Wait for LocalStack to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4566/_localstack/health > /dev/null; then
+              echo "LocalStack is ready"
+              exit 0
+            fi
+            echo "Waiting for LocalStack... ($i/30)"
+            sleep 2
+          done
+          echo "LocalStack did not become healthy"
+          docker ps -a
+          docker logs localstack
+          exit 1
 
       - name: Install dependencies
         run: |
