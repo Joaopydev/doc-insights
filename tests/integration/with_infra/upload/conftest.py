@@ -14,19 +14,11 @@ from src.shared.infrastructure.dynamodb.client import DynamoDBClient
 def setup_upload_infrastructure():
 
     #Creating S3 local storage
-    s3_client = boto3.client(
-        "s3",
-        endpoint_url=settings.aws_endpoint_url,
-        region_name=settings.aws_default_region,
-    )
+    s3_client = boto3.client("s3")
     s3_client.create_bucket(Bucket=settings.bucket_name)
 
     #Creating DynamoDB local table
-    dynamo = boto3.client(
-        "dynamodb",
-        endpoint_url=settings.aws_endpoint_url,
-        region_name=settings.aws_default_region,
-    )
+    dynamo = boto3.client("dynamodb")
 
     existing_tables = dynamo.list_tables()["TableNames"]
 

@@ -1,9 +1,9 @@
 {
-  "id": "4a3164e5-c679-49ae-b785-7f03e370dd44",
+  "id": "711c71fa-b611-4d91-9a10-9afa70a5b63f",
   "license_format": "1",
-  "signature": "7129fce8083244f11e1caaa541fedd56c6a28ba62050264ec05289c5737c41f2",
+  "signature": "8872a4e59ee8948b749c3eaec498f5420e6e1e34b9b14c49ba596f285ca35102",
   "license_type": "freemium",
-  "issue_date": "2026-10-17T01:03:04+00:00",
+  "issue_date": "2026-10-19T19:55:17+00:00",
   "expiry_date": "2026-11-18T12:32:17+00:00",
   "products": [
     {
@@ -311,9 +311,9 @@
     }
   ],
   "license_status": "ACTIVE",
-  "license_secret": "TFMxLjA6dRMrS/3sMbH6gT32WAUzprENmTsYzT6EmXjiLmTDWDRfgdWhono7ff46Xv2TXMvD",
-  "last_activated": "2026-10-17T01:03:04.177277Z",
-  "reactivate_after": "2026-10-18T01:03:04+00:00",
+  "license_secret": "TFMxLjA6cA/hRmWmcEL4QsJ7/C6nun8TCoVXOM+etitMfvi0RXsBpQuU9fLfjIWL2SPSneyN",
+  "last_activated": "2026-10-19T20:16:47.689428Z",
+  "reactivate_after": "2026-10-20T20:16:47+00:00",
   "offline_data": {
     "localstack_version": "2026.10.0"
   }

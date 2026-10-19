@@ -138,4 +138,3 @@ jobs:
           SUBNET_ID: ${{ secrets.SUBNET_ID }}
           SUBNET2_ID: ${{ secrets.SUBNET2_ID }}
           LAMBDA_SECURITY_GROUP_ID: ${{ secrets.LAMBDA_SECURITY_GROUP_ID }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
