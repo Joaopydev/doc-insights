@@ -36,11 +36,18 @@ def setup_localstack_infrastructure():
         AttributeDefinitions=[
             {"AttributeName": "id", "AttributeType": "S"},
             {"AttributeName": "s3_key", "AttributeType": "S"},
+            {"AttributeName": "textract_job_id", "AttributeType": "S"},
         ],
         GlobalSecondaryIndexes=[
             {
                 "IndexName": "storage-key-index",
                 "KeySchema": [{"AttributeName": "s3_key", "KeyType": "HASH"}],
+                "Projection": {"ProjectionType": "ALL"},
+                "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5},
+            },
+            {
+                "IndexName": "textract-job-id-index",
+                "KeySchema": [{"AttributeName": "textract_job_id", "KeyType": "HASH"}],
                 "Projection": {"ProjectionType": "ALL"},
                 "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5},
             },

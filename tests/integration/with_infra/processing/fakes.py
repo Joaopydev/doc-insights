@@ -10,8 +10,10 @@ class FakeTextExtractor(TextExtractor):
         self.calls.append({"storage_key": storage_key, "document_id": document_id})
         return self.job_id
 
-    def get_document_text(self, *args, **kwargs):
-        raise NotImplementedError
+    def get_document_text(self, job_id: str) -> str:
+        textract_job_id, document_id = job_id.split("/")
+        self.calls.append({"job_id": textract_job_id, "document_id": document_id})
+        return job_id
 
     def _blocks_to_text(self, *args, **kwargs):
         raise NotImplementedError
