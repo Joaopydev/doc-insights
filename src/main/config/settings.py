@@ -18,9 +18,7 @@ class Settings(BaseSettings):
 
     neon_database_url: str
     websocket_endpoint: str
-    redis_host: str
-    redis_port: str
-    redis_password: str
+    redis_url: str
 
     model_config = SettingsConfigDict(
         env_file=".env",
