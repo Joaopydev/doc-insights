@@ -57,6 +57,7 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
+            - dynamodb:BatchWriteItem
           Resource:
             - !GetAtt DocumentTable.Arn
             - !Sub "${DocumentTable.Arn}/index/*"
