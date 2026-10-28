@@ -1,6 +1,7 @@
 import json
 import boto3
 
+from src.main.config.logger import logger
 from src.shared.application.ports.event_publisher import EventPublisher
 from src.shared.application.events.domain_event import DomainEvent
 
@@ -12,7 +13,7 @@ class EventBridgeClient(EventPublisher):
         self.client = boto3.client("events")
 
     def publish(self, event: DomainEvent) -> None:
-        self.client.put_events(
+        response = self.client.put_events(
             Entries=[
                 {
                     "Source": event.source,
@@ -22,3 +23,7 @@ class EventBridgeClient(EventPublisher):
                 }
             ]
         )
+
+        if response["FailedEntryCount"] > 0:
+            logger.error("Failed to publish event: %s", response["Entries"])
+            raise RuntimeError("Failed to publish event")
