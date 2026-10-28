@@ -1,4 +1,5 @@
 from typing import Dict, Any
+import traceback
 
 from src.main.adapters.api_gateway_request_adapter import APIGatewayRequestAdapter
 from src.main.composers.delete_conversation_composer import DeleteConversationComposer
@@ -13,6 +14,7 @@ def handler(event: Dict[str, Any], context: Any):
             auth_required=True,
         )
     except Exception as e:
+        traceback.print_exc()
         http_response = ExceptionResponseBuilder.build(e)
 
     return http_response.to_dict()
