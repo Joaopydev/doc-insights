@@ -20,6 +20,14 @@ class DBClient(ABC):
         pass
 
     @abstractmethod
+    def delete_many(
+        self,
+        table_name: str,
+        keys: list[dict]
+    ):
+        pass
+
+    @abstractmethod
     def get_item(
         self,
         table_name: str,

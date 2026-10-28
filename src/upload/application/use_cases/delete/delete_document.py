@@ -1,5 +1,4 @@
 from src.upload.application.ports.document_repository import DocumentRepository
-
 from src.upload.application.use_cases.delete.dto import DeleteDocumentInput
 
 from src.errors.types.unauthorized_document_access import UnauthorizedDocumentAccess
@@ -9,7 +8,11 @@ from src.errors.types.document_not_found import DocumentNotFound
 
 class DeleteDocumentUseCase:
 
-    def __init__(self, document_repository: DocumentRepository) -> None:
+    def __init__(
+        self,
+        document_repository: DocumentRepository,
+    ) -> None:
+
         self.document_repository = document_repository
 
     def execute(

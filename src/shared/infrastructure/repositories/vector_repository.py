@@ -88,3 +88,11 @@ class VectorRepository(VectorRepositoryInterface):
                     )
                     for row in rows
                 ]
+
+    def delete_chunks_by_document_id(self, document_id: str) -> None:
+        with self.connection as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "DELETE FROM document_chunks WHERE document_id = %s",
+                    (document_id,)
+                )

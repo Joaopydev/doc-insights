@@ -13,3 +13,6 @@ class FakeVectorRepository(VectorRepository):
 
     def semantic_similarity_search(self, embedding, document_id, limit = 5):
         raise NotImplementedError
+
+    def delete_chunks_by_document_id(self, document_id):
+        raise NotImplementedError

@@ -34,3 +34,11 @@ class ChatRepository(ABC):
     @abstractmethod
     def list_conversations_by_user_id(self, user_id: str) -> List[Conversation]:
         pass
+
+    @abstractmethod
+    def delete_messages_by_conversation_id(self, conversation_id: str) -> None:
+        pass
+
+    @abstractmethod
+    def delete_conversation_by_id(self, conversation_id: str) -> None:
+        pass

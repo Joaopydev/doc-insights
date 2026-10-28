@@ -17,6 +17,12 @@ class DynamoDBClient(DBClient):
         table = self._get_table(table_name)
         table.delete_item(Key=key)
 
+    def delete_many(self, table_name: str, keys: list[dict]):
+        table = self._get_table(table_name)
+        with table.batch_writer() as batch:
+            for key in keys:
+                batch.delete_item(Key=key)
+
     def get_item(self, table_name, key):
         table = self._get_table(table_name)
         response = table.get_item(Key=key)

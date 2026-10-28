@@ -126,3 +126,21 @@ class ChatRepository(ChatRepositoryInterface):
             )
             for item in items
         ]
+
+    def delete_messages_by_conversation_id(self, conversation_id: str) -> None:
+        messages = self.get_messages(conversation_id)
+        if not messages:
+            return
+
+        self.db_client.delete_many(
+            table_name=settings.chat_table,
+            keys=[{"id": message.id} for message in messages],
+        )
+
+    def delete_conversation_by_id(self, conversation_id: str) -> None:
+        self.db_client.delete_item(
+            table_name=settings.conversation_table,
+            key={
+                "id": conversation_id
+            }
+        )

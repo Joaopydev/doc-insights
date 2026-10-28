@@ -46,6 +46,7 @@ provider:
           Action:
             - s3:PutObject
             - s3:GetObject
+            - s3:DeleteObject
           Resource: !Sub "${UploadsBucket.Arn}/*"
 
         - Effect: Allow
@@ -250,6 +251,17 @@ functions:
       - httpApi:
           path: /document/{document_id}
           method: GET
+
+  deleteConversation:
+    image:
+      uri: ${env:ECR_IMAGE_URI}
+      command:
+        - src.functions.delete_conversation.handler.handler
+    events:
+      - httpApi:
+          path: /conversation/{conversation_id}
+          method: DELETE
+    timeout: 15
 
   getConversationById:
     image:

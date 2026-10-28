@@ -53,3 +53,13 @@ class S3Client(StoragePort):
             Body=body,
             ContentType=content_type,
         )
+
+
+    def delete_object(self, key: str) -> None:
+        try:
+            self.s3_client.delete_object(
+                Bucket=settings.bucket_name,
+                Key=key,
+            )
+        except ClientError as e:
+            raise RuntimeError(f"Failed to delete object from s3: {e}") from e

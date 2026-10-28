@@ -13,3 +13,7 @@ class DocumentRepository(ABC):
     @abstractmethod
     def update_conversation_id(self, document_id: str, conversation_id: str) -> None:
         pass
+
+    @abstractmethod
+    def delete_document_by_id(self, document_id: str) -> None:
+        pass

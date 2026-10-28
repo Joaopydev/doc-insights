@@ -47,3 +47,11 @@ class DocumentRepository(DocumentRepositoryInterface):
                 ":conversation_id": conversation_id
             }
         )
+
+    def delete_document_by_id(self, document_id: str) -> None:
+        self.db_client.delete_item(
+            table_name=settings.document_table,
+            key={
+                "id": document_id
+            }
+        )

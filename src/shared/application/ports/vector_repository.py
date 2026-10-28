@@ -21,3 +21,7 @@ class VectorRepository(ABC):
         limit: int = 5
     ) -> List[DocumentChunk]:
         pass
+
+    @abstractmethod
+    def delete_chunks_by_document_id(self, document_id: str) -> None:
+        pass

@@ -26,3 +26,10 @@ class StoragePort(ABC):
         content_type: str
     ) -> None:
         pass
+
+    @abstractmethod
+    def delete_object(
+        self,
+        key: str,
+    ) -> None:
+        pass
