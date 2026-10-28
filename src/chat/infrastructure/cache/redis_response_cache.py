@@ -13,7 +13,10 @@ from src.main.config.logger import logger
 class RedisResponseCache(ResponseCache):
 
     def __init__(self):
-        self.redis_client = redis.Redis.from_url(settings.redis_url)
+        self.redis_client = redis.Redis.from_url(
+            url=settings.redis_url,
+            decode_responses=True,
+        )
 
     def get(self, key: str) -> Optional[str]:
         try:
