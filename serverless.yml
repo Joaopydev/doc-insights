@@ -11,6 +11,7 @@ provider:
     cors:
       allowedOrigins:
         - http://localhost:5173
+        - https://doc-insights-web.vercel.app/
       allowedMethods:
         - POST
         - GET
@@ -346,12 +347,12 @@ resources:
     TextractTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: textract-document-completed-${sls:stage}
+        TopicName: textract-document-completed
 
     TextractPublishRole:
       Type: AWS::IAM::Role
       Properties:
-        RoleName: textract-publish-role-${sls:stage}
+        RoleName: textract-publish-role
         AssumeRolePolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -388,7 +389,7 @@ resources:
     UploadsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: docinsight-raw-documents-${sls:stage}
+        BucketName: docinsight-raw-documents
         CorsConfiguration:
           CorsRules:
             - AllowedOrigins:
@@ -409,7 +410,7 @@ resources:
     QuestionsQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: question-queue-service-${sls:stage}
+        QueueName: question-queue-service
         VisibilityTimeout: 60
         RedrivePolicy:
           maxReceiveCount: 3
@@ -418,12 +419,12 @@ resources:
     QuestionsDLQ:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: questions-queue-dlq-service-${sls:stage}
+        QueueName: questions-queue-dlq-service
 
     DocumentTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: document-table-${sls:stage}
+        TableName: document-table
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
@@ -462,7 +463,7 @@ resources:
     UserTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: user-table-${sls:stage}
+        TableName: user-table
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
@@ -483,7 +484,7 @@ resources:
     ChatTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: chat-table-${sls:stage}
+        TableName: chat-table
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
@@ -513,7 +514,7 @@ resources:
     ConversationTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: conversation-table-${sls:stage}
+        TableName: conversation-table
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: id
@@ -543,7 +544,7 @@ resources:
     ConnectionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: connection-table-${sls:stage}
+        TableName: connection-table
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: connection_id
