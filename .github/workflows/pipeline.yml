@@ -125,7 +125,7 @@ jobs:
         run: npm install -g serverless@3
 
       - name: Deploy to AWS
-        run: serverless deploy
+        run: serverless deploy --stage prod
         env:
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
           JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
