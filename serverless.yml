@@ -11,7 +11,7 @@ provider:
     cors:
       allowedOrigins:
         - http://localhost:5173
-        - https://doc-insights-web.vercel.app/
+        - https://doc-insights-web.vercel.app
       allowedMethods:
         - POST
         - GET
