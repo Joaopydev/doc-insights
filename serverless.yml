@@ -394,6 +394,7 @@ resources:
           CorsRules:
             - AllowedOrigins:
                 - http://localhost:5173
+                - https://doc-insights-web.vercel.app
               AllowedMethods:
                 - GET
                 - PUT
