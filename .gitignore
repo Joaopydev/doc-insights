@@ -20,6 +20,7 @@ var/
 .pytest_cache
 **__pycache__/
 **.pytest_cache/
+.idea/
 
 node_modules
 

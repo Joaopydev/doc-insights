@@ -562,3 +562,15 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
+
+    DocumentAnalysisProfileTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: document-analysis-profile-table-${sls:stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: document_type
+            AttributeType: S
+        KeySchema:
+          - AttributeName: document_type
+            KeyType: HASH
